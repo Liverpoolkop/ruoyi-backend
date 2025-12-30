@@ -1,10 +1,8 @@
 #!/bin/sh
-# ./ry.sh start 启动 stop 停止 restart 重启 status 状态
 AppName=ruoyi-admin.jar
-
-# JVM参数
-JVM_OPTS="-Dname=$AppName  -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintGCDateStamps  -XX:+PrintGCDetails -XX:NewRatio=1 -XX:SurvivorRatio=30 -XX:+UseParallelGC -XX:+UseParallelOldGC"
-APP_HOME=`pwd`
+JVM_OPTS="-Dname=$AppName -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:NewRatio=1 -XX:SurvivorRatio=30 -XX:+UseParallelGC -XX:+UseParallelOldGC"
+APP_HOME=$(cd "$(dirname "$0")"; pwd)
+JAR_PATH=$APP_HOME/ruoyi-admin/target/$AppName
 LOG_PATH=$APP_HOME/logs/$AppName.log
 
 if [ "$1" = "" ];
@@ -19,16 +17,24 @@ then
     exit 1
 fi
 
+function build()
+{
+    cd "$APP_HOME" && mvn -q clean install -DskipTests
+}
+
 function start()
 {
     PID=`ps -ef |grep java|grep $AppName|grep -v grep|awk '{print $2}'`
-
-	if [ x"$PID" != x"" ]; then
-	    echo "$AppName is running..."
-	else
-		nohup java $JVM_OPTS -jar $AppName > /dev/null 2>&1 &
-		echo "Start $AppName success..."
-	fi
+    if [ ! -f "$JAR_PATH" ]; then
+        build
+    fi
+    mkdir -p "$(dirname "$LOG_PATH")"
+    if [ x"$PID" != x"" ]; then
+        echo "$AppName is running..."
+    else
+        nohup java $JVM_OPTS -jar "$JAR_PATH" >> "$LOG_PATH" 2>&1 &
+        echo "Start $AppName success..."
+    fi
 }
 
 function stop()
@@ -75,6 +81,10 @@ function status()
 case $1 in
     start)
     start;;
+    dev)
+    cd "$APP_HOME/ruoyi-admin" && mvn spring-boot:run;;
+    build)
+    build;;
     stop)
     stop;;
     restart)
@@ -82,5 +92,5 @@ case $1 in
     status)
     status;;
     *)
-
+    echo "Usage: $0 {start|dev|build|stop|restart|status}";;
 esac
