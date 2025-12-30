@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduClassMapper">
+  <resultMap id="EduClassMap" type="com.ruoyi.edu.domain.EduClass">
+    <id column="class_id" property="classId"/>
+    <result column="class_name" property="className"/>
+    <result column="grade" property="grade"/>
+    <result column="major" property="major"/>
+    <result column="teacher_id" property="teacherId"/>
+    <result column="class_desc" property="classDesc"/>
+    <result column="status" property="status"/>
+    <result column="create_by" property="createBy"/>
+    <result column="create_time" property="createTime"/>
+    <result column="update_by" property="updateBy"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    class_id, class_name, grade, major, teacher_id, class_desc, status, create_by, create_time, update_by, update_time
+  </sql>
+
+  <select id="selectById" resultMap="EduClassMap">
+    SELECT <include refid="Base_Column_List"/> FROM edu_class WHERE class_id = #{classId}
+  </select>
+
+  <select id="selectList" resultMap="EduClassMap">
+    SELECT <include refid="Base_Column_List"/> FROM edu_class
+    <where>
+      <if test="className != null and className != ''">AND class_name LIKE concat('%', #{className}, '%')</if>
+      <if test="grade != null and grade != ''">AND grade = #{grade}</if>
+      <if test="major != null and major != ''">AND major = #{major}</if>
+      <if test="status != null and status != ''">AND status = #{status}</if>
+    </where>
+    ORDER BY grade DESC, major ASC, class_name ASC
+  </select>
+
+  <insert id="insert" parameterType="com.ruoyi.edu.domain.EduClass" useGeneratedKeys="true" keyProperty="classId">
+    INSERT INTO edu_class (class_name, grade, major, teacher_id, class_desc, status, create_by, create_time)
+    VALUES (#{className}, #{grade}, #{major}, #{teacherId}, #{classDesc}, #{status}, #{createBy}, #{createTime})
+  </insert>
+
+  <update id="update" parameterType="com.ruoyi.edu.domain.EduClass">
+    UPDATE edu_class
+    SET class_name=#{className}, grade=#{grade}, major=#{major}, teacher_id=#{teacherId}, class_desc=#{classDesc}, status=#{status}, update_by=#{updateBy}, update_time=#{updateTime}
+    WHERE class_id = #{classId}
+  </update>
+
+  <delete id="deleteById">
+    DELETE FROM edu_class WHERE class_id = #{classId}
+  </delete>
+</mapper>

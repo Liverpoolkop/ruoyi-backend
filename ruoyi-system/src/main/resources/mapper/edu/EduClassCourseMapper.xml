@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduClassCourseMapper">
+  <resultMap id="EduClassCourseMap" type="com.ruoyi.edu.domain.EduClassCourse">
+    <id column="id" property="id"/>
+    <result column="class_id" property="classId"/>
+    <result column="course_id" property="courseId"/>
+  </resultMap>
+
+  <select id="selectByClassId" resultMap="EduClassCourseMap">
+    SELECT id, class_id, course_id FROM edu_class_course WHERE class_id = #{classId}
+  </select>
+
+  <insert id="insert" parameterType="com.ruoyi.edu.domain.EduClassCourse" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO edu_class_course (class_id, course_id, create_time)
+    VALUES (#{classId}, #{courseId}, #{createTime})
+  </insert>
+
+  <delete id="delete">
+    DELETE FROM edu_class_course WHERE class_id = #{classId} AND course_id = #{courseId}
+  </delete>
+</mapper>

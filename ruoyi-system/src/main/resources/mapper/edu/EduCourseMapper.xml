@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduCourseMapper">
+  <resultMap id="EduCourseMap" type="com.ruoyi.edu.domain.EduCourse">
+    <id column="course_id" property="courseId"/>
+    <result column="course_name" property="courseName"/>
+    <result column="teacher_id" property="teacherId"/>
+    <result column="grade" property="grade"/>
+    <result column="major" property="major"/>
+    <result column="course_desc" property="courseDesc"/>
+    <result column="status" property="status"/>
+    <result column="create_time" property="createTime"/>
+    <result column="update_time" property="updateTime"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    course_id, course_name, teacher_id, grade, major, course_desc, status, create_time, update_time
+  </sql>
+
+  <select id="selectById" resultMap="EduCourseMap">
+    SELECT <include refid="Base_Column_List"/> FROM edu_course WHERE course_id = #{courseId}
+  </select>
+
+  <select id="selectList" resultMap="EduCourseMap">
+    SELECT <include refid="Base_Column_List"/> FROM edu_course
+    <where>
+      <if test="courseName != null and courseName != ''">AND course_name LIKE concat('%', #{courseName}, '%')</if>
+      <if test="grade != null and grade != ''">AND grade = #{grade}</if>
+      <if test="major != null and major != ''">AND major = #{major}</if>
+      <if test="status != null and status != ''">AND status = #{status}</if>
+    </where>
+    ORDER BY grade DESC, major ASC, course_name ASC
+  </select>
+
+  <insert id="insert" parameterType="com.ruoyi.edu.domain.EduCourse" useGeneratedKeys="true" keyProperty="courseId">
+    INSERT INTO edu_course (course_name, teacher_id, grade, major, course_desc, status, create_time)
+    VALUES (#{courseName}, #{teacherId}, #{grade}, #{major}, #{courseDesc}, #{status}, #{createTime})
+  </insert>
+
+  <update id="update" parameterType="com.ruoyi.edu.domain.EduCourse">
+    UPDATE edu_course
+    SET course_name=#{courseName}, teacher_id=#{teacherId}, grade=#{grade}, major=#{major}, course_desc=#{courseDesc}, status=#{status}, update_time=#{updateTime}
+    WHERE course_id = #{courseId}
+  </update>
+
+  <delete id="deleteById">
+    DELETE FROM edu_course WHERE course_id = #{courseId}
+  </delete>
+</mapper>
