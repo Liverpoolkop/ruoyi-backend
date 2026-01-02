@@ -7,7 +7,7 @@ ruoyi:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/ruoyi/uploadPath）
-  profile: D:/ruoyi/uploadPath
+  profile: /Users/bytedance/edu/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -47,6 +47,22 @@ user:
 
 # Spring配置
 spring:
+  main:
+    allow-circular-references: true
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 2584054150@qq.com
+    password: oytcnkgoqwqyeabg
+    protocol: smtp
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
   # 资源信息
   messages:
     # 国际化资源文件路径

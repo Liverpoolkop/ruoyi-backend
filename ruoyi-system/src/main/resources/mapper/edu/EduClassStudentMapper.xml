@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.edu.mapper.EduClassStudentMapper">
+<mapper namespace="com.ruoyi.edu.mapper.EduClassStudentMapper">  
   <resultMap id="EduClassStudentMap" type="com.ruoyi.edu.domain.EduClassStudent">
     <id column="id" property="id"/>
     <result column="class_id" property="classId"/>
     <result column="student_id" property="studentId"/>
+    <result column="student_name" property="studentName"/>
   </resultMap>
 
   <select id="selectByClassId" resultMap="EduClassStudentMap">
-    SELECT id, class_id, student_id FROM edu_class_student WHERE class_id = #{classId}
+    SELECT s.id, s.class_id, s.student_id, u.user_name AS student_name
+    FROM edu_class_student s
+    LEFT JOIN sys_user u ON u.user_id = s.student_id
+    WHERE s.class_id = #{classId}
   </select>
 
   <insert id="insert" parameterType="com.ruoyi.edu.domain.EduClassStudent" useGeneratedKeys="true" keyProperty="id">
@@ -19,4 +23,8 @@
   <delete id="delete">
     DELETE FROM edu_class_student WHERE class_id = #{classId} AND student_id = #{studentId}
   </delete>
+
+  <select id="selectJoinedClassIds" resultType="java.lang.Long">
+    SELECT class_id FROM edu_class_student WHERE student_id = #{studentId}
+  </select>
 </mapper>

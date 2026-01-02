@@ -45,6 +45,22 @@ public interface SysUserMapper
     public SysUser selectUserByUserName(String userName);
 
     /**
+     * 通过用户ID字符串查询用户（用于学号匹配）
+     * 
+     * @param userId 用户ID字符串
+     * @return 用户对象信息
+     */
+    public SysUser selectUserByUserId(String userId);
+
+    /**
+     * 通过用户ID前缀查询用户列表
+     *
+     * @param prefix 用户ID前缀
+     * @return 用户信息集合
+     */
+    public List<SysUser> selectUserByIdPrefix(String prefix);
+
+    /**
      * 通过用户ID查询用户
      * 
      * @param userId 用户ID

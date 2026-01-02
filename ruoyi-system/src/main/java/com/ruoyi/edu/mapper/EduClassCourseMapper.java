@@ -1,6 +1,7 @@
 package com.ruoyi.edu.mapper;
 
 import java.util.List;
+
 import com.ruoyi.edu.domain.EduClassCourse;
 
 public interface EduClassCourseMapper {

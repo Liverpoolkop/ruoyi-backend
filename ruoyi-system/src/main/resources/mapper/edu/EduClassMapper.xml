@@ -1,47 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.edu.mapper.EduClassMapper">
+<mapper namespace="com.ruoyi.edu.mapper.EduClassMapper"> 
   <resultMap id="EduClassMap" type="com.ruoyi.edu.domain.EduClass">
     <id column="class_id" property="classId"/>
     <result column="class_name" property="className"/>
     <result column="grade" property="grade"/>
-    <result column="major" property="major"/>
+    <result column="major_id" property="majorId"/>
     <result column="teacher_id" property="teacherId"/>
-    <result column="class_desc" property="classDesc"/>
     <result column="status" property="status"/>
     <result column="create_by" property="createBy"/>
     <result column="create_time" property="createTime"/>
     <result column="update_by" property="updateBy"/>
     <result column="update_time" property="updateTime"/>
+    <result column="teacher_name" property="teacherName"/>
+    <result column="major_name" property="majorName"/>
+    <result column="student_count" property="studentCount"/>
   </resultMap>
 
   <sql id="Base_Column_List">
-    class_id, class_name, grade, major, teacher_id, class_desc, status, create_by, create_time, update_by, update_time
+    c.class_id, c.class_name, c.grade, c.major_id, c.teacher_id, c.status, c.create_by, c.create_time, c.update_by, c.update_time,
+    u.user_name AS teacher_name, m.major_name AS major_name,
+    (SELECT count(1) FROM edu_class_student cs WHERE cs.class_id = c.class_id) as student_count
   </sql>
 
   <select id="selectById" resultMap="EduClassMap">
-    SELECT <include refid="Base_Column_List"/> FROM edu_class WHERE class_id = #{classId}
+    SELECT <include refid="Base_Column_List"/>
+    FROM edu_class c
+    LEFT JOIN sys_user u ON u.user_id = c.teacher_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
+    WHERE c.class_id = #{classId}
   </select>
 
   <select id="selectList" resultMap="EduClassMap">
-    SELECT <include refid="Base_Column_List"/> FROM edu_class
+    SELECT <include refid="Base_Column_List"/>
+    FROM edu_class c
+    LEFT JOIN sys_user u ON u.user_id = c.teacher_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
     <where>
-      <if test="className != null and className != ''">AND class_name LIKE concat('%', #{className}, '%')</if>
-      <if test="grade != null and grade != ''">AND grade = #{grade}</if>
-      <if test="major != null and major != ''">AND major = #{major}</if>
-      <if test="status != null and status != ''">AND status = #{status}</if>
+      <if test="className != null and className != ''">AND c.class_name LIKE concat('%', #{className}, '%')</if>
+      <if test="grade != null and grade != ''">AND c.grade = #{grade}</if>
+      <if test="majorId != null">AND c.major_id = #{majorId}</if>
+      <if test="teacherId != null">AND c.teacher_id = #{teacherId}</if>
+      <if test="status != null and status != ''">AND c.status = #{status}</if>
     </where>
-    ORDER BY grade DESC, major ASC, class_name ASC
+    ORDER BY c.grade DESC, m.major_name ASC, c.class_name ASC
+  </select>
+
+  <select id="selectByStudentId" resultMap="EduClassMap">
+    SELECT <include refid="Base_Column_List"/>
+    FROM edu_class c
+    LEFT JOIN sys_user u ON u.user_id = c.teacher_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
+    JOIN edu_class_student cs ON cs.class_id = c.class_id
+    WHERE cs.student_id = #{studentId}
+    ORDER BY c.create_time DESC
   </select>
 
   <insert id="insert" parameterType="com.ruoyi.edu.domain.EduClass" useGeneratedKeys="true" keyProperty="classId">
-    INSERT INTO edu_class (class_name, grade, major, teacher_id, class_desc, status, create_by, create_time)
-    VALUES (#{className}, #{grade}, #{major}, #{teacherId}, #{classDesc}, #{status}, #{createBy}, #{createTime})
+    INSERT INTO edu_class (class_name, grade, major_id, teacher_id, status, create_by, create_time)
+    VALUES (#{className}, #{grade}, #{majorId}, #{teacherId}, #{status}, #{createBy}, #{createTime})
   </insert>
 
   <update id="update" parameterType="com.ruoyi.edu.domain.EduClass">
     UPDATE edu_class
-    SET class_name=#{className}, grade=#{grade}, major=#{major}, teacher_id=#{teacherId}, class_desc=#{classDesc}, status=#{status}, update_by=#{updateBy}, update_time=#{updateTime}
+    SET class_name=#{className}, grade=#{grade}, major_id=#{majorId}, teacher_id=#{teacherId}, status=#{status}, update_by=#{updateBy}, update_time=#{updateTime}
     WHERE class_id = #{classId}
   </update>
 

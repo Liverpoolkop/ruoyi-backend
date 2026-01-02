@@ -6,6 +6,7 @@ public class EduClassStudent extends BaseEntity {
     private Long id;
     private Long classId;
     private Long studentId;
+    private String studentName;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -13,4 +14,6 @@ public class EduClassStudent extends BaseEntity {
     public void setClassId(Long classId) { this.classId = classId; }
     public Long getStudentId() { return studentId; }
     public void setStudentId(Long studentId) { this.studentId = studentId; }
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
 }

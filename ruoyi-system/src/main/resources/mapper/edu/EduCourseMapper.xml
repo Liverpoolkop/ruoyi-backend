@@ -4,46 +4,108 @@
   <resultMap id="EduCourseMap" type="com.ruoyi.edu.domain.EduCourse">
     <id column="course_id" property="courseId"/>
     <result column="course_name" property="courseName"/>
-    <result column="teacher_id" property="teacherId"/>
-    <result column="grade" property="grade"/>
-    <result column="major" property="major"/>
+    <result column="major_id" property="majorId"/>
     <result column="course_desc" property="courseDesc"/>
     <result column="status" property="status"/>
+    <result column="course_img" property="courseImg"/>
     <result column="create_time" property="createTime"/>
     <result column="update_time" property="updateTime"/>
+    <result column="teacher_names" property="teacherNames"/>
+    <result column="major_name" property="majorName"/>
+    <result column="student_count" property="studentCount"/>
+    <result column="lesson_hours" property="lessonHours"/>
   </resultMap>
 
   <sql id="Base_Column_List">
-    course_id, course_name, teacher_id, grade, major, course_desc, status, create_time, update_time
+    c.course_id, c.course_name, c.major_id, c.course_desc, c.status, c.course_img, c.create_time, c.update_time, c.lesson_hours, m.major_name AS major_name
   </sql>
 
   <select id="selectById" resultMap="EduCourseMap">
-    SELECT <include refid="Base_Column_List"/> FROM edu_course WHERE course_id = #{courseId}
+    SELECT <include refid="Base_Column_List"/>, 
+    GROUP_CONCAT(u.nick_name) AS teacher_names,
+    (SELECT COUNT(*) FROM edu_course_student cs WHERE cs.course_id = c.course_id) AS student_count
+    FROM edu_course c
+    LEFT JOIN edu_course_teacher ct ON c.course_id = ct.course_id
+    LEFT JOIN sys_user u ON ct.teacher_id = u.user_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
+    WHERE c.course_id = #{courseId}
+    GROUP BY c.course_id
   </select>
 
   <select id="selectList" resultMap="EduCourseMap">
-    SELECT <include refid="Base_Column_List"/> FROM edu_course
+    SELECT <include refid="Base_Column_List"/>, 
+    GROUP_CONCAT(u.nick_name) AS teacher_names,
+    (SELECT COUNT(*) FROM edu_course_student cs WHERE cs.course_id = c.course_id) AS student_count
+    FROM edu_course c
+    LEFT JOIN edu_course_teacher ct ON c.course_id = ct.course_id
+    LEFT JOIN sys_user u ON ct.teacher_id = u.user_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
     <where>
-      <if test="courseName != null and courseName != ''">AND course_name LIKE concat('%', #{courseName}, '%')</if>
-      <if test="grade != null and grade != ''">AND grade = #{grade}</if>
-      <if test="major != null and major != ''">AND major = #{major}</if>
-      <if test="status != null and status != ''">AND status = #{status}</if>
+      <if test="courseName != null and courseName != ''">AND c.course_name LIKE concat('%', #{courseName}, '%')</if>
+      <if test="majorId != null">AND c.major_id = #{majorId}</if>
+      <if test="status != null and status != ''">AND c.status = #{status}</if>
+      <if test="teacherId != null">AND ct.teacher_id = #{teacherId}</if>
+      <!-- Support searching by teacher name if needed, but simplistic for now -->
     </where>
-    ORDER BY grade DESC, major ASC, course_name ASC
+    GROUP BY c.course_id
+    ORDER BY c.create_time DESC
   </select>
 
   <insert id="insert" parameterType="com.ruoyi.edu.domain.EduCourse" useGeneratedKeys="true" keyProperty="courseId">
-    INSERT INTO edu_course (course_name, teacher_id, grade, major, course_desc, status, create_time)
-    VALUES (#{courseName}, #{teacherId}, #{grade}, #{major}, #{courseDesc}, #{status}, #{createTime})
+    INSERT INTO edu_course (course_name, major_id, course_desc, status, course_img, lesson_hours, create_time)
+    VALUES (#{courseName}, #{majorId}, #{courseDesc}, #{status}, #{courseImg}, #{lessonHours}, #{createTime})
   </insert>
 
   <update id="update" parameterType="com.ruoyi.edu.domain.EduCourse">
     UPDATE edu_course
-    SET course_name=#{courseName}, teacher_id=#{teacherId}, grade=#{grade}, major=#{major}, course_desc=#{courseDesc}, status=#{status}, update_time=#{updateTime}
+    SET course_name=#{courseName}, major_id=#{majorId}, course_desc=#{courseDesc}, status=#{status}, course_img=#{courseImg}, lesson_hours=#{lessonHours}, update_time=#{updateTime}
     WHERE course_id = #{courseId}
   </update>
 
   <delete id="deleteById">
     DELETE FROM edu_course WHERE course_id = #{courseId}
   </delete>
+  
+  <insert id="batchInsertCourseTeacher">
+    INSERT INTO edu_course_teacher(course_id, teacher_id) VALUES
+    <foreach item="item" index="index" collection="list" separator=",">
+      (#{courseId}, #{item})
+    </foreach>
+  </insert>
+  
+  <delete id="deleteCourseTeacherByCourseId">
+    DELETE FROM edu_course_teacher WHERE course_id = #{courseId}
+  </delete>
+  
+  <select id="selectTeacherIdsByCourseId" resultType="Long">
+    SELECT teacher_id FROM edu_course_teacher WHERE course_id = #{courseId}
+  </select>
+
+  <select id="selectManagedCourses" resultMap="EduCourseMap">
+    SELECT <include refid="Base_Column_List"/>, 
+    GROUP_CONCAT(u.nick_name) AS teacher_names,
+    (SELECT COUNT(*) FROM edu_course_student cs WHERE cs.course_id = c.course_id) AS student_count
+    FROM edu_course c
+    INNER JOIN edu_course_teacher ect ON c.course_id = ect.course_id
+    LEFT JOIN edu_course_teacher ct ON c.course_id = ct.course_id
+    LEFT JOIN sys_user u ON ct.teacher_id = u.user_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
+    WHERE ect.teacher_id = #{teacherId}
+    GROUP BY c.course_id
+    ORDER BY c.create_time DESC
+  </select>
+
+  <select id="selectJoinedCourses" resultMap="EduCourseMap">
+    SELECT <include refid="Base_Column_List"/>, 
+    GROUP_CONCAT(u.nick_name) AS teacher_names,
+    (SELECT COUNT(*) FROM edu_course_student cs WHERE cs.course_id = c.course_id) AS student_count
+    FROM edu_course c
+    INNER JOIN edu_course_student ecs ON c.course_id = ecs.course_id
+    LEFT JOIN edu_course_teacher ct ON c.course_id = ct.course_id
+    LEFT JOIN sys_user u ON ct.teacher_id = u.user_id
+    LEFT JOIN edu_major m ON m.major_id = c.major_id
+    WHERE ecs.student_id = #{userId}
+    GROUP BY c.course_id
+    ORDER BY ecs.create_time DESC
+  </select>
 </mapper>

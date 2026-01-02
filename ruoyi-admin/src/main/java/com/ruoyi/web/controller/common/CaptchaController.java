@@ -20,6 +20,11 @@ import com.ruoyi.common.utils.sign.Base64;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.system.service.ISysConfigService;
 
+import com.ruoyi.common.utils.StringUtils;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.util.Random;
+
 /**
  * 验证码操作处理
  * 
@@ -39,6 +44,45 @@ public class CaptchaController
     
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
+    private String mailFrom;
+
+    /**
+     * 发送邮箱验证码
+     */
+    @GetMapping("/captcha/email")
+    public AjaxResult sendEmailCode(String email)
+    {
+        if (StringUtils.isEmpty(email))
+        {
+            return AjaxResult.error("邮箱不能为空");
+        }
+
+        // 生成6位随机验证码
+        String code = String.valueOf(new Random().nextInt(899999) + 100000);
+        String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + email;
+
+        // 保存验证码信息，有效期5分钟
+        redisCache.setCacheObject(verifyKey, code, 5, TimeUnit.MINUTES);
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(mailFrom);
+            message.setTo(email);
+            message.setSubject("注册验证码");
+            message.setText("您的注册验证码是：" + code + "，有效期5分钟。");
+            mailSender.send(message);
+        } catch (Exception e) {
+            return AjaxResult.error("邮件发送失败：" + e.getMessage());
+        }
+
+        return AjaxResult.success("验证码已发送");
+    }
+
     /**
      * 生成验证码
      */
@@ -48,6 +92,7 @@ public class CaptchaController
         AjaxResult ajax = AjaxResult.success();
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         ajax.put("captchaEnabled", captchaEnabled);
+        ajax.put("registerEnabled", true);
         if (!captchaEnabled)
         {
             return ajax;

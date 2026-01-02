@@ -23,11 +23,11 @@ public class SysUser extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 用户ID */
-    @Excel(name = "用户序号", type = Type.EXPORT, cellType = ColumnType.NUMERIC, prompt = "用户编号")
+    @Excel(name = "用户ID", cellType = ColumnType.NUMERIC, prompt = "用户编号")
     private Long userId;
 
     /** 部门ID */
-    @Excel(name = "部门编号", type = Type.IMPORT)
+    @Excel(name = "部门编号", type = Type.EXPORT)
     private Long deptId;
 
     /** 用户账号 */
@@ -35,7 +35,7 @@ public class SysUser extends BaseEntity
     private String userName;
 
     /** 用户昵称 */
-    @Excel(name = "用户名称")
+    @Excel(name = "用户昵称")
     private String nickName;
 
     /** 用户邮箱 */
@@ -64,21 +64,15 @@ public class SysUser extends BaseEntity
     private String delFlag;
 
     /** 最后登录IP */
-    @Excel(name = "最后登录IP", type = Type.EXPORT)
     private String loginIp;
 
     /** 最后登录时间 */
-    @Excel(name = "最后登录时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss", type = Type.EXPORT)
     private Date loginDate;
 
     /** 密码最后更新时间 */
     private Date pwdUpdateDate;
 
     /** 部门对象 */
-    @Excels({
-        @Excel(name = "部门名称", targetAttr = "deptName", type = Type.EXPORT),
-        @Excel(name = "部门负责人", targetAttr = "leader", type = Type.EXPORT)
-    })
     private SysDept dept;
 
     /** 角色对象 */
@@ -92,6 +86,9 @@ public class SysUser extends BaseEntity
 
     /** 角色ID */
     private Long roleId;
+
+    /** 角色名称 */
+    private String roleName;
 
     public SysUser()
     {
@@ -134,6 +131,7 @@ public class SysUser extends BaseEntity
     }
 
     @Xss(message = "用户昵称不能包含脚本字符")
+    @NotBlank(message = "用户昵称不能为空")
     @Size(min = 0, max = 30, message = "用户昵称长度不能超过30个字符")
     public String getNickName()
     {
@@ -310,6 +308,16 @@ public class SysUser extends BaseEntity
     public void setRoleId(Long roleId)
     {
         this.roleId = roleId;
+    }
+
+    public String getRoleName()
+    {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName)
+    {
+        this.roleName = roleName;
     }
 
     @Override

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduCourseStudentMapper">
+  <resultMap id="RelMap" type="com.ruoyi.edu.domain.EduCourseStudent">
+    <result column="course_id" property="courseId"/>
+    <result column="student_id" property="studentId"/>
+    <result column="create_by" property="createBy"/>
+    <result column="create_time" property="createTime"/>
+  </resultMap>
+
+  <select id="selectByCourseId" resultMap="RelMap">
+    SELECT course_id, student_id, create_by, create_time FROM edu_course_student WHERE course_id = #{courseId}
+  </select>
+
+  <select id="selectJoinedCourseIds" resultType="java.lang.Long">
+    SELECT course_id FROM edu_course_student WHERE student_id = #{studentId}
+  </select>
+
+  <select id="selectStudentsByCourseId" resultType="com.ruoyi.common.core.domain.entity.SysUser">
+    SELECT u.user_id as userId, u.user_name as userName, u.nick_name as nickName, u.avatar, u.email, u.phonenumber, u.sex, u.status
+    FROM sys_user u
+    INNER JOIN edu_course_student cs ON u.user_id = cs.student_id
+    WHERE cs.course_id = #{courseId} AND u.del_flag = '0'
+    ORDER BY u.user_id ASC
+  </select>
+
+  <insert id="insert" parameterType="com.ruoyi.edu.domain.EduCourseStudent">
+    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time)
+    VALUES(#{courseId}, #{studentId}, #{createBy}, #{createTime})
+  </insert>
+
+  <insert id="batchInsert" parameterType="java.util.List">
+    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time) VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (#{item.courseId}, #{item.studentId}, #{item.createBy}, #{item.createTime})
+    </foreach>
+  </insert>
+
+  <delete id="delete">
+    DELETE FROM edu_course_student WHERE course_id = #{courseId} AND student_id = #{studentId}
+  </delete>
+</mapper>

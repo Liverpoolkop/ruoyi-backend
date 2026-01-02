@@ -4,9 +4,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
+
+import com.ruoyi.edu.service.IEduClassService;
 import com.ruoyi.edu.domain.EduClass;
 import com.ruoyi.edu.mapper.EduClassMapper;
-import com.ruoyi.edu.service.IEduClassService;
 
 @Service
 public class EduClassServiceImpl implements IEduClassService {
@@ -18,6 +19,9 @@ public class EduClassServiceImpl implements IEduClassService {
 
     @Override
     public List<EduClass> selectList(EduClass query) { return mapper.selectList(query); }
+
+    @Override
+    public List<EduClass> selectJoinedClasses(Long studentId) { return mapper.selectByStudentId(studentId); }
 
     @Override
     @Transactional
