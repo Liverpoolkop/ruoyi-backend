@@ -63,6 +63,21 @@ public class SysProfileController extends BaseController
     public AjaxResult updateProfile(@RequestBody SysUser user)
     {
         LoginUser loginUser = getLoginUser();
+        // 获取最新的用户信息，确保密码是最新的
+        SysUser sysUser = userService.selectUserById(loginUser.getUserId());
+        
+        if (StringUtils.isNotEmpty(user.getPassword()))
+        {
+            if (!SecurityUtils.matchesPassword(user.getPassword(), sysUser.getPassword()))
+            {
+                return error("修改个人信息失败，密码错误");
+            }
+        }
+        else
+        {
+            return error("请输入密码以确认修改");
+        }
+        
         SysUser currentUser = loginUser.getUser();
         currentUser.setNickName(user.getNickName());
         currentUser.setEmail(user.getEmail());

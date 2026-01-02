@@ -49,7 +49,7 @@ public class SysRegisterService
         boolean captchaEnabled = configService.selectCaptchaEnabled();
         if (captchaEnabled)
         {
-            validateCaptcha(username, registerBody.getCode(), registerBody.getUuid());
+            validateCaptcha(username, registerBody.getCode(), null);
         }
 
         if (StringUtils.isEmpty(username))
@@ -63,7 +63,7 @@ public class SysRegisterService
         else if (username.length() < UserConstants.USERNAME_MIN_LENGTH
                 || username.length() > UserConstants.USERNAME_MAX_LENGTH)
         {
-            msg = "账户长度必须在2到20个字符之间";
+            msg = "账户长度必须在2到50个字符之间";
         }
         else if (password.length() < UserConstants.PASSWORD_MIN_LENGTH
                 || password.length() > UserConstants.PASSWORD_MAX_LENGTH)
@@ -76,7 +76,8 @@ public class SysRegisterService
         }
         else
         {
-            sysUser.setNickName(username);
+            sysUser.setNickName(registerBody.getNickName());
+            sysUser.setEmail(username);
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
             boolean regFlag = userService.registerUser(sysUser);
@@ -86,6 +87,7 @@ public class SysRegisterService
             }
             else
             {
+                userService.insertUserAuth(sysUser.getUserId(), new Long[]{101L});
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
             }
         }
@@ -102,9 +104,11 @@ public class SysRegisterService
      */
     public void validateCaptcha(String username, String code, String uuid)
     {
-        String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
+        // 邮箱验证码校验逻辑：key = CAPTCHA_CODE_KEY + username(email)
+        String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + username;
         String captcha = redisCache.getCacheObject(verifyKey);
-        redisCache.deleteObject(verifyKey);
+        // redisCache.deleteObject(verifyKey); // 验证码使用后是否立即删除取决于业务需求，通常建议删除防止重放
+        
         if (captcha == null)
         {
             throw new CaptchaExpireException();
@@ -113,5 +117,6 @@ public class SysRegisterService
         {
             throw new CaptchaException();
         }
+        redisCache.deleteObject(verifyKey);
     }
 }

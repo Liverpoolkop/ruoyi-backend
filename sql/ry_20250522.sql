@@ -42,7 +42,7 @@ drop table if exists sys_user;
 create table sys_user (
   user_id           bigint(20)      not null auto_increment    comment '用户ID',
   dept_id           bigint(20)      default null               comment '部门ID',
-  user_name         varchar(30)     not null                   comment '用户账号',
+  user_name         varchar(50)     not null                   comment '用户账号',
   nick_name         varchar(30)     not null                   comment '用户昵称',
   user_type         varchar(2)      default '00'               comment '用户类型（00系统用户）',
   email             varchar(50)     default ''                 comment '用户邮箱',
@@ -260,6 +260,13 @@ insert into sys_menu values('1058', '导入代码', '116', '4', '#', '', '', '',
 insert into sys_menu values('1059', '预览代码', '116', '5', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:preview',           '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('1060', '生成代码', '116', '6', '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:code',              '#', 'admin', sysdate(), '', null, '');
 
+insert into sys_menu values('2000', '教学管理', '0', '5', 'edu',             null,                      '', '', 1, 0, 'M', '0', '0', '', 'education', 'admin', sysdate(), '', null, '教学管理目录');
+insert into sys_menu values('2001', '班级管理', '2000', '1', 'edu/class',    'edu/class/index',        '', '', 1, 0, 'C', '0', '0', '', 'class',     'admin', sysdate(), '', null, '班级管理菜单');
+insert into sys_menu values('2002', '课程管理', '2000', '2', 'edu/course',   'edu/course/index',       '', '', 1, 0, 'C', '0', '0', '', 'course',    'admin', sysdate(), '', null, '课程管理菜单');
+insert into sys_menu values('2003', '专业管理', '2000', '3', 'edu/major',    'edu/major/index',        '', '', 1, 0, 'C', '0', '0', '', 'education', 'admin', sysdate(), '', null, '专业管理菜单');
+insert into sys_menu values('2004', '班级详情', '2000', '9', 'class',        'edu/class/detail',       '', 'ClassDetail', 1, 0, 'C', '1', '0', '', '#', 'admin', sysdate(), '', null, '班级详情隐藏路由');
+insert into sys_menu values('2005', '课程详情', '2000', '10','edu/course/detail','edu/course/detail',  '', 'CourseDetail', 1, 0, 'C', '1', '0', '', '#', 'admin', sysdate(), '', null, '课程详情隐藏路由');
+
 
 -- ----------------------------
 -- 6、用户和角色关联表  用户N-1角色
@@ -376,6 +383,17 @@ insert into sys_role_menu values ('2', '1057');
 insert into sys_role_menu values ('2', '1058');
 insert into sys_role_menu values ('2', '1059');
 insert into sys_role_menu values ('2', '1060');
+insert into sys_role_menu values ('2', '2000');
+insert into sys_role_menu values ('2', '2001');
+insert into sys_role_menu values ('2', '2002');
+insert into sys_role_menu values ('2', '2004');
+insert into sys_role_menu values ('2', '2005');
+insert into sys_role_menu values ('1', '2000');
+insert into sys_role_menu values ('1', '2001');
+insert into sys_role_menu values ('1', '2002');
+insert into sys_role_menu values ('1', '2003');
+insert into sys_role_menu values ('1', '2004');
+insert into sys_role_menu values ('1', '2005');
 
 -- ----------------------------
 -- 8、角色和部门关联表  角色1-N部门

@@ -1,20 +1,16 @@
 package com.ruoyi.web.controller.system;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
@@ -114,6 +110,49 @@ public class SysUserController extends BaseController
         ajax.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
         ajax.put("posts", postService.selectPostAll());
         return ajax;
+    }
+
+    /**
+     * 搜索用户（支持ID前缀或用户名模糊搜索）
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:query')")
+    @GetMapping("/search")
+    public AjaxResult search(@RequestParam String query) {
+        if (StringUtils.isEmpty(query)) {
+             return AjaxResult.success(Collections.emptyList());
+        }
+        
+        List<SysUser> resultList = new ArrayList<>();
+
+        // 1. Try searching by ID prefix if query is numeric
+        if (StringUtils.isNumeric(query)) {
+            List<SysUser> users = userService.selectUserByIdPrefix(query);
+            if (users != null) {
+                resultList.addAll(users);
+            }
+        }
+        
+        // 2. Also try searching by username (fuzzy)
+        SysUser searchUser = new SysUser();
+        searchUser.setUserName(query);
+        List<SysUser> usersByName = userService.selectUserList(searchUser);
+        if (usersByName != null) {
+            // Avoid duplicates
+            for (SysUser u : usersByName) {
+                boolean exists = false;
+                for (SysUser existing : resultList) {
+                    if (existing.getUserId().equals(u.getUserId())) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    resultList.add(u);
+                }
+            }
+        }
+
+        return AjaxResult.success(resultList);
     }
 
     /**

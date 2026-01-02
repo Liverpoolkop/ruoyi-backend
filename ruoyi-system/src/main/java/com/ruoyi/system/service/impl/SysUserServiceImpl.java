@@ -118,6 +118,17 @@ public class SysUserServiceImpl implements ISysUserService
     }
 
     /**
+     * 通过用户ID前缀查询用户列表
+     *
+     * @param prefix 用户ID前缀
+     * @return 用户信息集合
+     */
+    @Override
+    public List<SysUser> selectUserByIdPrefix(String prefix) {
+        return userMapper.selectUserByIdPrefix(prefix);
+    }
+
+    /**
      * 通过用户ID查询用户
      * 
      * @param userId 用户ID
@@ -516,7 +527,15 @@ public class SysUserServiceImpl implements ISysUserService
                 if (StringUtils.isNull(u))
                 {
                     BeanValidators.validateWithException(validator, user);
-                    deptService.checkDeptDataScope(user.getDeptId());
+                    if (StringUtils.isNull(user.getDeptId())) {
+                        user.setDeptId(100L); // 默认部门: 若依科技
+                    }
+                    if (user.getDeptId() != null) {
+                        deptService.checkDeptDataScope(user.getDeptId());
+                    }
+                    if (StringUtils.isEmpty(user.getStatus())) {
+                        user.setStatus("1"); // 默认停用
+                    }
                     String password = configService.selectConfigByKey("sys.user.initPassword");
                     user.setPassword(SecurityUtils.encryptPassword(password));
                     user.setCreateBy(operName);
@@ -529,9 +548,13 @@ public class SysUserServiceImpl implements ISysUserService
                     BeanValidators.validateWithException(validator, user);
                     checkUserAllowed(u);
                     checkUserDataScope(u.getUserId());
-                    deptService.checkDeptDataScope(user.getDeptId());
+                    if (user.getDeptId() != null) {
+                        deptService.checkDeptDataScope(user.getDeptId());
+                    }
                     user.setUserId(u.getUserId());
-                    user.setDeptId(u.getDeptId());
+                    if (user.getDeptId() == null) {
+                        user.setDeptId(u.getDeptId()); // 保持原部门
+                    }
                     user.setUpdateBy(operName);
                     userMapper.updateUser(user);
                     successNum++;

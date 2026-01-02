@@ -44,6 +44,14 @@ public interface ISysUserService
     public SysUser selectUserByUserName(String userName);
 
     /**
+     * 通过用户ID前缀查询用户列表
+     *
+     * @param prefix 用户ID前缀
+     * @return 用户信息集合
+     */
+    public List<SysUser> selectUserByIdPrefix(String prefix);
+
+    /**
      * 通过用户ID查询用户
      * 
      * @param userId 用户ID

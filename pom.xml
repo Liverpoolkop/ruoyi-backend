@@ -183,6 +183,13 @@
                 <version>${kaptcha.version}</version>
             </dependency>
 
+            <!-- 邮件服务 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-mail</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
             <!-- 定时任务-->
             <dependency>
                 <groupId>com.ruoyi</groupId>

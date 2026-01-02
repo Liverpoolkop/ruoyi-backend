@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduMajorMapper">
+        
+    <resultMap type="EduMajor" id="EduMajorResult">
+        <result property="majorId"    column="major_id"    />
+        <result property="majorName"    column="major_name"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectEduMajorVo">
+        select major_id, major_name, status, create_time, update_time from edu_major
+    </sql>
+
+    <select id="selectEduMajorList" parameterType="EduMajor" resultMap="EduMajorResult">
+        <include refid="selectEduMajorVo"/>
+        <where>  
+            <if test="majorName != null  and majorName != ''"> and major_name like concat('%', #{majorName}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectEduMajorByMajorId" parameterType="Long" resultMap="EduMajorResult">
+        <include refid="selectEduMajorVo"/>
+        where major_id = #{majorId}
+    </select>
+
+    <insert id="insertEduMajor" parameterType="EduMajor" useGeneratedKeys="true" keyProperty="majorId">
+        insert into edu_major
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="majorName != null and majorName != ''">major_name,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="majorName != null and majorName != ''">#{majorName},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduMajor" parameterType="EduMajor">
+        update edu_major
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="majorName != null and majorName != ''">major_name = #{majorName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where major_id = #{majorId}
+    </update>
+
+    <delete id="deleteEduMajorByMajorId" parameterType="Long">
+        delete from edu_major where major_id = #{majorId}
+    </delete>
+
+    <delete id="deleteEduMajorByMajorIds" parameterType="String">
+        delete from edu_major where major_id in 
+        <foreach item="majorId" collection="array" open="(" separator="," close=")">
+            #{majorId}
+        </foreach>
+    </delete>
+</mapper>
