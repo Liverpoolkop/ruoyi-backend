@@ -11,4 +11,5 @@ public interface EduCourseStudentMapper {
     List<Long> selectJoinedCourseIds(Long studentId);
     int batchInsert(List<EduCourseStudent> list);
     List<com.ruoyi.common.core.domain.entity.SysUser> selectStudentsByCourseId(Long courseId);
+    
 }

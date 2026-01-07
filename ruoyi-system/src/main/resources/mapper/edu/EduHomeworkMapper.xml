@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ruoyi.edu.mapper.EduHomeworkMapper">
+
+    <!-- 查询：用 AS 映射（最稳，不依赖驼峰设置） -->
+    <select id="selectHomeworkListByCourseId" resultType="com.ruoyi.edu.domain.EduHomework">
+        SELECT
+            homework_id AS homeworkId,
+            course_id   AS courseId,
+            title       AS title,
+            content     AS content,
+            deadline    AS deadline,
+            status      AS status,
+            create_by   AS createBy,
+            create_time AS createTime
+        FROM edu_homework
+        WHERE course_id = #{courseId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 插入：回填自增主键 homeworkId -->
+    <insert id="insertEduHomework" useGeneratedKeys="true" keyProperty="homeworkId">
+        INSERT INTO edu_homework
+            (course_id, title, content, deadline, status, create_by, create_time)
+        VALUES
+            (#{courseId}, #{title}, #{content}, #{deadline}, #{status}, #{createBy}, #{createTime})
+    </insert>
+
+</mapper>

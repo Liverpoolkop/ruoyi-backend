@@ -11,4 +11,5 @@ public interface EduClassStudentMapper {
     int insert(EduClassStudent rel);
     int delete(@Param("classId") Long classId, @Param("studentId") Long studentId);
     List<Long> selectJoinedClassIds(Long studentId);
+    Long selectClassIdByStudentId(Long studentId);
 }
