@@ -27,4 +27,12 @@
   <select id="selectJoinedClassIds" resultType="java.lang.Long">
     SELECT class_id FROM edu_class_student WHERE student_id = #{studentId}
   </select>
+
+  <select id="selectClassIdByStudentId" resultType="java.lang.Long">
+    select class_id
+    from edu_class_student
+    where student_id = #{studentId}
+    limit 1
+  </select>
+
 </mapper>

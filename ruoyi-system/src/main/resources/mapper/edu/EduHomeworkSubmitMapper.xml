@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduHomeworkSubmitMapper">
+
+
+<resultMap id="EduHomeworkSubmitMap" type="com.ruoyi.edu.domain.EduHomeworkSubmit">
+        <id property="submitId" column="submit_id"/>
+        <result property="homeworkId" column="homework_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="classId" column="class_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="submitContent" column="submit_content"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="submitStatus" column="submit_status"/>
+        <result property="score" column="score"/>
+        <result property="teacherComment" column="teacher_comment"/>
+        <result property="gradeTime" column="grade_time"/>
+        <result property="graderId" column="grader_id"/>
+    </resultMap>
+
+
+    <sql id="BaseColumn">
+        submit_id, homework_id, course_id, class_id, student_id, user_id, student_name,
+        submit_content, submit_time, submit_status,
+        score, teacher_comment, grade_time, grader_id
+    </sql>
+
+    <select id="selectByCourseIdAndUserId" resultMap="EduHomeworkSubmitMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM edu_homework_submit
+        WHERE course_id = #{courseId}
+        AND user_id = #{userId}
+        ORDER BY submit_time DESC
+    </select>
+
+    <select id="selectByHomeworkAndUser" resultMap="EduHomeworkSubmitMap">
+        SELECT <include refid="BaseColumn"/>
+        FROM edu_homework_submit
+        WHERE homework_id = #{homeworkId}
+        AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+    <insert id="insertEduHomeworkSubmit" parameterType="com.ruoyi.edu.domain.EduHomeworkSubmit">
+        INSERT INTO edu_homework_submit
+        (homework_id, course_id, class_id, student_id, user_id, student_name, submit_content, submit_time, submit_status)
+        VALUES
+            (#{homeworkId}, #{courseId}, #{classId}, #{studentId}, #{userId}, #{studentName}, #{submitContent}, NOW(), #{submitStatus})
+    </insert>
+
+    <update id="updateEduHomeworkSubmit" parameterType="com.ruoyi.edu.domain.EduHomeworkSubmit">
+        UPDATE edu_homework_submit
+        SET submit_content = #{submitContent},
+            student_name = #{studentName},
+            submit_time = NOW(),
+            submit_status = #{submitStatus}
+        WHERE submit_id = #{submitId}
+    </update>
+
+    <!-- 新增评分操作 -->
+    <update id="gradeSubmit" parameterType="com.ruoyi.edu.domain.EduHomeworkSubmit">
+        UPDATE edu_homework_submit
+        SET score = #{score},
+            teacher_comment = #{teacherComment},
+            grade_time = NOW(),
+            grader_id = #{graderId},
+            submit_status = '2'
+        WHERE submit_id = #{submitId}
+    </update>
+    <select id="selectSubmitsByHomeworkId"
+            parameterType="java.lang.Long"
+            resultType="com.ruoyi.edu.domain.EduHomeworkSubmit">
+        SELECT
+            s.submit_id AS submitId,
+            s.homework_id AS homeworkId,
+            s.course_id AS courseId,
+            s.user_id AS userId,
+            u.nick_name AS studentName,
+            s.submit_content AS submitContent,
+            s.submit_time AS submitTime,
+            s.submit_status AS submitStatus,
+            s.score AS score,
+            s.teacher_comment AS teacherComment,
+            s.grade_time AS gradeTime
+        FROM edu_homework_submit s
+                 LEFT JOIN sys_user u ON u.user_id = s.user_id
+        WHERE s.homework_id = #{homeworkId}
+        ORDER BY s.submit_time DESC
+    </select>
+</mapper>
