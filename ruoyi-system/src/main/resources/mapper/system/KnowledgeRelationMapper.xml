@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+        <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.KnowledgeRelationMapper">
+
+<resultMap type="KnowledgeRelation" id="KnowledgeRelationResult">
+    <result property="relationId" column="relation_id"/>
+    <result property="sourceId" column="source_id"/>
+    <result property="targetId" column="target_id"/>
+    <result property="relationType" column="relation_type"/>
+    <result property="relationStrength" column="relation_strength"/>
+    <result property="description" column="description"/>
+    <result property="createTime" column="create_time"/>
+    <result property="sourceName" column="source_name"/>
+    <result property="targetName" column="target_name"/>
+</resultMap>
+
+<sql id="selectKnowledgeRelationVo">
+    select r.relation_id, r.source_id, r.target_id, r.relation_type, r.relation_strength,
+    r.description, r.create_time,
+    s.knowledge_name as source_name,
+    t.knowledge_name as target_name
+    from edu_knowledge_relation r
+    left join edu_knowledge s on r.source_id = s.knowledge_id
+    left join edu_knowledge t on r.target_id = t.knowledge_id
+</sql>
+
+<select id="selectKnowledgeRelationById" parameterType="Long" resultMap="KnowledgeRelationResult">
+    <include refid="selectKnowledgeRelationVo"/>
+    where r.relation_id = #{relationId}
+</select>
+
+<select id="selectKnowledgeRelationList" parameterType="KnowledgeRelation" resultMap="KnowledgeRelationResult">
+    <include refid="selectKnowledgeRelationVo"/>
+    <where>
+        <if test="sourceId != null">
+            AND r.source_id = #{sourceId}
+        </if>
+        <if test="targetId != null">
+            AND r.target_id = #{targetId}
+        </if>
+        <if test="relationType != null and relationType != ''">
+            AND r.relation_type = #{relationType}
+        </if>
+        <if test="description != null and description != ''">
+            AND r.description like concat('%', #{description}, '%')
+        </if>
+        <if test="sourceName != null and sourceName != ''">
+            AND s.knowledge_name like concat('%', #{sourceName}, '%')
+        </if>
+        <if test="targetName != null and targetName != ''">
+            AND t.knowledge_name like concat('%', #{targetName}, '%')
+        </if>
+        <if test="courseId != null">
+            AND (s.course_id = #{courseId} or t.course_id = #{courseId})
+        </if>
+    </where>
+    order by r.create_time desc
+</select>
+
+<insert id="insertKnowledgeRelation" parameterType="KnowledgeRelation" useGeneratedKeys="true" keyProperty="relationId">
+    insert into edu_knowledge_relation
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="sourceId != null">source_id,</if>
+        <if test="targetId != null">target_id,</if>
+        <if test="relationType != null and relationType != ''">relation_type,</if>
+        <if test="relationStrength != null">relation_strength,</if>
+        <if test="description != null">description,</if>
+        create_time,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+        <if test="sourceId != null">#{sourceId},</if>
+        <if test="targetId != null">#{targetId},</if>
+        <if test="relationType != null and relationType != ''">#{relationType},</if>
+        <if test="relationStrength != null">#{relationStrength},</if>
+        <if test="description != null">#{description},</if>
+        sysdate(),
+    </trim>
+</insert>
+
+<update id="updateKnowledgeRelation" parameterType="KnowledgeRelation">
+    update edu_knowledge_relation
+    <trim prefix="SET" suffixOverrides=",">
+        <if test="sourceId != null">source_id = #{sourceId},</if>
+        <if test="targetId != null">target_id = #{targetId},</if>
+        <if test="relationType != null and relationType != ''">relation_type = #{relationType},</if>
+        <if test="relationStrength != null">relation_strength = #{relationStrength},</if>
+        <if test="description != null">description = #{description},</if>
+    </trim>
+    where relation_id = #{relationId}
+</update>
+
+<delete id="deleteKnowledgeRelationById" parameterType="Long">
+    delete from edu_knowledge_relation where relation_id = #{relationId}
+</delete>
+
+<delete id="deleteKnowledgeRelationByIds" parameterType="String">
+    delete from edu_knowledge_relation where relation_id in
+    <foreach item="relationId" collection="array" open="(" separator="," close=")">
+        #{relationId}
+    </foreach>
+</delete>
+
+<delete id="deleteRelationsByKnowledgeId" parameterType="Long">
+    delete from edu_knowledge_relation
+    where source_id = #{knowledgeId} or target_id = #{knowledgeId}
+</delete>
+
+<select id="selectRelationsByCourseId" parameterType="Long" resultMap="KnowledgeRelationResult">
+    <include refid="selectKnowledgeRelationVo"/>
+    where s.course_id = #{courseId} and t.course_id = #{courseId}
+    order by r.create_time
+</select>
+
+<select id="selectRelationsByKnowledgeId" parameterType="Long" resultMap="KnowledgeRelationResult">
+    <include refid="selectKnowledgeRelationVo"/>
+    where r.source_id = #{knowledgeId} or r.target_id = #{knowledgeId}
+    order by r.relation_type, r.create_time
+</select>
+
+<select id="checkRelationExists" resultType="int">
+    select count(1) from edu_knowledge_relation
+    where source_id = #{sourceId} and target_id = #{targetId}
+</select>
+
+<select id="getDegreeByKnowledgeId" parameterType="Long" resultType="int">
+    select count(1) from edu_knowledge_relation
+    where source_id = #{knowledgeId} or target_id = #{knowledgeId}
+</select>
+</mapper>
