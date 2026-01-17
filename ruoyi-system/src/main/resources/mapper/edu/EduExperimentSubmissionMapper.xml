@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduExperimentSubmissionMapper">
+
+    <resultMap id="SubmissionResult" type="com.ruoyi.edu.domain.EduExperimentSubmission">
+        <id column="submission_id" property="submissionId"/>
+        <result column="experiment_id" property="experimentId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="code" property="code"/>
+        <result column="result" property="result"/>
+        <result column="stdout" property="stdout"/>
+        <result column="stderr" property="stderr"/>
+        <result column="compile_output" property="compileOutput"/>
+        <result column="run_time" property="runTime"/>
+        <result column="memory_used" property="memoryUsed"/>
+        <result column="submit_time" property="submitTime"/>
+    </resultMap>
+
+    <sql id="selectSubmissionVo">
+        select submission_id, experiment_id, student_id, code, result, stdout, stderr, compile_output, run_time, memory_used, submit_time
+        from edu_experiment_submission
+    </sql>
+
+    <select id="selectList" resultMap="SubmissionResult">
+        <include refid="selectSubmissionVo"/>
+        <where>
+            <if test="experimentId != null">AND experiment_id = #{experimentId}</if>
+            <if test="studentId != null">AND student_id = #{studentId}</if>
+        </where>
+        order by submit_time desc
+    </select>
+
+    <select id="selectById" resultMap="SubmissionResult">
+        <include refid="selectSubmissionVo"/>
+        where submission_id = #{submissionId}
+    </select>
+
+    <insert id="insert" parameterType="com.ruoyi.edu.domain.EduExperimentSubmission" useGeneratedKeys="true" keyProperty="submissionId">
+        insert into edu_experiment_submission (
+            experiment_id, student_id, code, result, stdout, stderr, compile_output, run_time, memory_used, submit_time
+        ) values (
+            #{experimentId}, #{studentId}, #{code}, #{result}, #{stdout}, #{stderr}, #{compileOutput}, #{runTime}, #{memoryUsed}, #{submitTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.ruoyi.edu.domain.EduExperimentSubmission">
+        update edu_experiment_submission
+        <set>
+            <if test="result != null">result = #{result},</if>
+            <if test="stdout != null">stdout = #{stdout},</if>
+            <if test="stderr != null">stderr = #{stderr},</if>
+            <if test="compileOutput != null">compile_output = #{compileOutput},</if>
+            <if test="runTime != null">run_time = #{runTime},</if>
+            <if test="memoryUsed != null">memory_used = #{memoryUsed},</if>
+        </set>
+        where submission_id = #{submissionId}
+    </update>
+
+</mapper>

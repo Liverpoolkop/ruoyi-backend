@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduExperimentMapper">
+
+    <resultMap id="EduExperimentResult" type="com.ruoyi.edu.domain.EduExperiment">
+        <id column="experiment_id" property="experimentId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="experiment_name" property="experimentName"/>
+        <result column="description" property="description"/>
+        <result column="test_input" property="testInput"/>
+        <result column="test_output" property="testOutput"/>
+        <result column="status" property="status"/>
+        <result column="deadline" property="deadline"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="selectExperimentVo">
+        select experiment_id, course_id, experiment_name, description, test_input, test_output, status, deadline, create_by, create_time, update_time
+        from edu_experiment
+    </sql>
+
+    <select id="selectList" resultMap="EduExperimentResult">
+        <include refid="selectExperimentVo"/>
+        <where>
+            <if test="courseId != null">AND course_id = #{courseId}</if>
+            <if test="experimentName != null and experimentName != ''">AND experiment_name like concat('%', #{experimentName}, '%')</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectById" resultMap="EduExperimentResult">
+        <include refid="selectExperimentVo"/>
+        where experiment_id = #{experimentId}
+    </select>
+
+    <insert id="insert" parameterType="com.ruoyi.edu.domain.EduExperiment" useGeneratedKeys="true" keyProperty="experimentId">
+        insert into edu_experiment (
+            course_id, experiment_name, description, test_input, test_output, status, deadline, create_by, create_time
+        ) values (
+            #{courseId}, #{experimentName}, #{description}, #{testInput}, #{testOutput}, #{status}, #{deadline}, #{createBy}, #{createTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.ruoyi.edu.domain.EduExperiment">
+        update edu_experiment
+        <set>
+            <if test="experimentName != null">experiment_name = #{experimentName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="testInput != null">test_input = #{testInput},</if>
+            <if test="testOutput != null">test_output = #{testOutput},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="deadline != null">deadline = #{deadline},</if>
+            update_time = now()
+        </set>
+        where experiment_id = #{experimentId}
+    </update>
+
+    <delete id="deleteById">
+        delete from edu_experiment where experiment_id = #{experimentId}
+    </delete>
+
+</mapper>
