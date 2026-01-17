@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.TeachingResourceMapper">
+    
+    <resultMap type="TeachingResource" id="TeachingResourceResult">
+        <result property="resourceId"    column="resource_id"    />
+        <result property="courseId"      column="course_id"      />
+        <result property="resourceName"  column="resource_name"  />
+        <result property="category"      column="category"       />
+        <result property="filePath"      column="file_path"      />
+        <result property="fileSize"      column="file_size"      />
+        <result property="originName"    column="origin_name"    />
+        <result property="downloadCount" column="download_count" />
+        <result property="status"        column="status"         />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectVo">
+        select resource_id, course_id, resource_name, category, file_path, file_size, origin_name, download_count, status, create_by, create_time 
+        from teaching_resource
+    </sql>
+
+    <select id="selectTeachingResourceList" parameterType="TeachingResource" resultMap="TeachingResourceResult">
+        <include refid="selectVo"/>
+        <where>  
+            <if test="courseId != null "> and course_id = #{courseId}</if>
+            <if test="resourceName != null  and resourceName != ''"> and resource_name like concat('%', #{resourceName}, '%')</if>
+            <if test="category != null  and category != ''"> and category = #{category}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectTeachingResourceById" parameterType="Long" resultMap="TeachingResourceResult">
+        <include refid="selectVo"/>
+        where resource_id = #{resourceId}
+    </select>
+        
+    <insert id="insertTeachingResource" parameterType="TeachingResource" useGeneratedKeys="true" keyProperty="resourceId">
+        insert into teaching_resource
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">course_id,</if>
+            <if test="resourceName != null and resourceName != ''">resource_name,</if>
+            <if test="category != null">category,</if>
+            <if test="filePath != null and filePath != ''">file_path,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="originName != null">origin_name,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">#{courseId},</if>
+            <if test="resourceName != null and resourceName != ''">#{resourceName},</if>
+            <if test="category != null">#{category},</if>
+            <if test="filePath != null and filePath != ''">#{filePath},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="originName != null">#{originName},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="deleteTeachingResourceById" parameterType="Long">
+        delete from teaching_resource where resource_id = #{resourceId}
+    </update>
+
+    <update id="incrementDownloadCount" parameterType="Long">
+        update teaching_resource set download_count = download_count + 1 where resource_id = #{resourceId}
+    </update>
+
+    <update id="updateTeachingResource" parameterType="TeachingResource">
+        update teaching_resource
+        <set>
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="resourceName != null">resource_name = #{resourceName},</if>
+            <if test="filePath != null">file_path = #{filePath},</if>
+            <if test="category != null">category = #{category},</if>
+            
+            <if test="status != null">status = #{status},</if>
+            
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        where resource_id = #{resourceId}
+    </update>
+</mapper>
