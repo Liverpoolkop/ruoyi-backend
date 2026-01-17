@@ -54,15 +54,21 @@ public class EduChapterServiceImpl implements IEduChapterService
         EduChapter query = new EduChapter();
         query.setCourseId(courseId);
         List<EduChapter> list = eduChapterMapper.selectEduChapterList(query);
+        if (list == null) {
+            list = new ArrayList<>();
+        }
         
         // Fetch all resources for the course
         List<EduResource> resourceList = eduResourceMapper.selectByCourseId(courseId);
+        if (resourceList == null) {
+            resourceList = new ArrayList<>();
+        }
         
         // Assign resources to chapters
         for (EduChapter chapter : list) {
             List<EduResource> chapterResources = new ArrayList<>();
             for (EduResource resource : resourceList) {
-                if (resource.getChapterId().equals(chapter.getChapterId())) {
+                if (resource.getChapterId() != null && resource.getChapterId().equals(chapter.getChapterId())) {
                     chapterResources.add(resource);
                 }
             }
@@ -74,7 +80,7 @@ public class EduChapterServiceImpl implements IEduChapterService
         
         // Find Roots (parentId = 0)
         for (EduChapter t : list) {
-            if (t.getParentId() == 0) {
+            if (t.getParentId() != null && t.getParentId() == 0) {
                 returnList.add(t);
                 tempList.add(t.getChapterId());
             }
@@ -108,7 +114,7 @@ public class EduChapterServiceImpl implements IEduChapterService
     private List<EduChapter> getChildList(List<EduChapter> list, EduChapter t) {
         List<EduChapter> tlist = new ArrayList<>();
         for (EduChapter n : list) {
-            if (n.getParentId() != null && n.getParentId().longValue() == t.getChapterId().longValue()) {
+            if (n.getParentId() != null && t.getChapterId() != null && n.getParentId().longValue() == t.getChapterId().longValue()) {
                 tlist.add(n);
             }
         }
