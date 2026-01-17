@@ -115,7 +115,7 @@ public class SysUserController extends BaseController
     /**
      * 搜索用户（支持ID前缀或用户名模糊搜索）
      */
-    @PreAuthorize("@ss.hasPermi('system:user:query')")
+    //@PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping("/search")
     public AjaxResult search(@RequestParam String query) {
         if (StringUtils.isEmpty(query)) {

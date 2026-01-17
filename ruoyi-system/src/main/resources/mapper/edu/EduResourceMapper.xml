@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduResourceMapper">
+    <resultMap type="com.ruoyi.edu.domain.EduResource" id="EduResourceResult">
+        <id property="resourceId" column="resource_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="resourceName" column="resource_name"/>
+        <result property="url" column="url"/>
+        <result property="sort" column="sort"/>
+        <result property="type" column="type"/>
+    </resultMap>
+    
+    <sql id="selectEduResourceVo">
+        select resource_id, chapter_id, course_id, resource_name, url, sort, type, create_time from edu_resource
+    </sql>
+
+    <select id="selectByChapterId" resultMap="EduResourceResult">
+        <include refid="selectEduResourceVo"/>
+        WHERE chapter_id = #{chapterId} ORDER BY sort
+    </select>
+
+    <select id="selectByCourseId" resultMap="EduResourceResult">
+        <include refid="selectEduResourceVo"/>
+        WHERE course_id = #{courseId} ORDER BY sort
+    </select>
+
+    <select id="selectById" resultMap="EduResourceResult">
+        <include refid="selectEduResourceVo"/>
+        WHERE resource_id = #{resourceId}
+    </select>
+    
+    <insert id="insert" parameterType="com.ruoyi.edu.domain.EduResource" useGeneratedKeys="true" keyProperty="resourceId">
+        INSERT INTO edu_resource(chapter_id, course_id, resource_name, url, sort, type, create_time)
+        VALUES(#{chapterId}, #{courseId}, #{resourceName}, #{url}, #{sort}, #{type}, sysdate())
+    </insert>
+
+    <update id="update" parameterType="com.ruoyi.edu.domain.EduResource">
+        UPDATE edu_resource
+        <set>
+            <if test="resourceName != null">resource_name = #{resourceName},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="type != null">type = #{type},</if>
+        </set>
+        WHERE resource_id = #{resourceId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM edu_resource WHERE resource_id = #{resourceId}
+    </delete>
+</mapper>
