@@ -1,0 +1,267 @@
+============================================
+         实验题目和答案示例
+============================================
+
+【实验1：Hello World】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：Hello World
+实验描述：编写一个Java程序，输出 "Hello World"（不含引号）
+测试输入：（留空）
+期望输出：Hello World
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+
+
+【实验2：两数相加】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：两数相加
+实验描述：输入两个整数，输出它们的和
+测试输入：3
+5
+期望输出：8
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+        System.out.println(a + b);
+    }
+}
+
+
+【实验3：判断奇偶】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：判断奇偶
+实验描述：输入一个整数，如果是奇数输出"odd"，如果是偶数输出"even"
+测试输入：7
+期望输出：odd
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        if (n % 2 == 0) {
+            System.out.println("even");
+        } else {
+            System.out.println("odd");
+        }
+    }
+}
+
+
+【实验4：求最大值】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：求三个数的最大值
+实验描述：输入三个整数，输出其中的最大值
+测试输入：5
+12
+8
+期望输出：12
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int a = sc.nextInt();
+        int b = sc.nextInt();
+        int c = sc.nextInt();
+        int max = a;
+        if (b > max) max = b;
+        if (c > max) max = c;
+        System.out.println(max);
+    }
+}
+
+
+【实验5：计算阶乘】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：计算阶乘
+实验描述：输入一个正整数n（1≤n≤10），计算并输出n的阶乘
+测试输入：5
+期望输出：120
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int result = 1;
+        for (int i = 1; i <= n; i++) {
+            result *= i;
+        }
+        System.out.println(result);
+    }
+}
+
+
+【实验6：数组求和】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：数组求和
+实验描述：第一行输入一个整数n，表示数组长度。第二行输入n个整数。输出这n个整数的和
+测试输入：5
+1 2 3 4 5
+期望输出：15
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int sum = 0;
+        for (int i = 0; i < n; i++) {
+            sum += sc.nextInt();
+        }
+        System.out.println(sum);
+    }
+}
+
+
+【实验7：字符串反转】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：字符串反转
+实验描述：输入一个字符串，输出该字符串的反转结果
+测试输入：hello
+期望输出：olleh
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String str = sc.next();
+        String reversed = new StringBuilder(str).reverse().toString();
+        System.out.println(reversed);
+    }
+}
+
+
+【实验8：判断闰年】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：判断闰年
+实验描述：输入一个年份，判断是否为闰年。是闰年输出"yes"，不是输出"no"
+（闰年条件：能被4整除但不能被100整除，或者能被400整除）
+测试输入：2024
+期望输出：yes
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int year = sc.nextInt();
+        if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+            System.out.println("yes");
+        } else {
+            System.out.println("no");
+        }
+    }
+}
+
+
+【实验9：九九乘法表】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：九九乘法表
+实验描述：输入一个整数n（1≤n≤9），输出n阶乘法表（每个等式之间用空格分隔，每行末尾无空格）
+测试输入：3
+期望输出：1*1=1
+1*2=2 2*2=4
+1*3=3 2*3=6 3*3=9
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= i; j++) {
+                System.out.print(j + "*" + i + "=" + (i * j));
+                if (j < i) {
+                    System.out.print(" ");
+                }
+            }
+            System.out.println();
+        }
+    }
+}
+
+
+【实验10：计算平均分】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+实验名称：计算平均分
+实验描述：输入5个学生的成绩（整数），输出平均分（保留两位小数）
+测试输入：85
+90
+78
+92
+88
+期望输出：86.60
+状态：发布
+
+参考答案：
+────────────────────────────────────────────
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int sum = 0;
+        for (int i = 0; i < 5; i++) {
+            sum += sc.nextInt();
+        }
+        double avg = sum / 5.0;
+        System.out.printf("%.2f\n", avg);
+    }
+}
+
+
+============================================
+              使用提示
+============================================
+
+1. 教师发布实验时，直接复制上述内容到对应字段即可
+2. "测试输入"中每行代表一个输入值，多个值用换行分隔
+3. "期望输出"要精确匹配，包括空格和换行符
+4. 学生可以参考答案进行学习，但建议先自己思考再查看答案
+5. 建议按顺序发布实验，由易到难
+
+============================================
