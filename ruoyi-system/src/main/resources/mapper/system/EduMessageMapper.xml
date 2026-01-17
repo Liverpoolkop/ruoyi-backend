@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.EduMessageMapper">
+    
+    <resultMap type="EduMessage" id="EduMessageResult">
+        <result property="id"    column="id"    />
+        <result property="senderId"    column="sender_id"    />
+        <result property="receiverId"    column="receiver_id"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="readStatus"    column="read_status"    />
+        <result property="type"    column="type"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectEduMessageVo">
+        select id, sender_id, receiver_id, title, content, read_status, type, create_time from edu_message
+    </sql>
+
+    <select id="selectEduMessageList" parameterType="EduMessage" resultMap="EduMessageResult">
+        <include refid="selectEduMessageVo"/>
+        <where>  
+            <if test="senderId != null "> and sender_id = #{senderId}</if>
+            <if test="receiverId != null "> and receiver_id = #{receiverId}</if>
+            <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="readStatus != null  and readStatus != ''"> and read_status = #{readStatus}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        </where>
+        order by create_time desc
+    </select>
+    
+    <select id="selectEduMessageById" parameterType="Long" resultMap="EduMessageResult">
+        <include refid="selectEduMessageVo"/>
+        where id = #{id}
+    </select>
+    
+    <select id="selectUnreadCount" parameterType="Long" resultType="int">
+        select count(1) from edu_message where receiver_id = #{userId} and read_status = '0'
+    </select>
+        
+    <insert id="insertEduMessage" parameterType="EduMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into edu_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">sender_id,</if>
+            <if test="receiverId != null">receiver_id,</if>
+            <if test="title != null">title,</if>
+            <if test="content != null">content,</if>
+            <if test="readStatus != null">read_status,</if>
+            <if test="type != null">type,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="senderId != null">#{senderId},</if>
+            <if test="receiverId != null">#{receiverId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="readStatus != null">#{readStatus},</if>
+            <if test="type != null">#{type},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduMessage" parameterType="EduMessage">
+        update edu_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="readStatus != null">read_status = #{readStatus},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEduMessageById" parameterType="Long">
+        delete from edu_message where id = #{id}
+    </delete>
+
+    <delete id="deleteEduMessageByIds" parameterType="String">
+        delete from edu_message where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

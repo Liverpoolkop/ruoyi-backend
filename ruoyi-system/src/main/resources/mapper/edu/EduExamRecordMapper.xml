@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduExamRecordMapper">
+    
+    <resultMap type="EduExamRecord" id="EduExamRecordResult">
+        <result property="recordId"    column="record_id"    />
+        <result property="examId"    column="exam_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="score"    column="score"    />
+        <result property="submitTime"    column="submit_time"    />
+        <result property="answers"    column="answers"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectEduExamRecordVo">
+        select record_id, exam_id, user_id, score, submit_time, answers, create_time from edu_exam_record
+    </sql>
+
+    <select id="selectEduExamRecordList" parameterType="EduExamRecord" resultMap="EduExamRecordResult">
+        <include refid="selectEduExamRecordVo"/>
+        <where>  
+            <if test="examId != null "> and exam_id = #{examId}</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+        </where>
+    </select>
+    
+    <select id="selectEduExamRecordByRecordId" parameterType="Long" resultMap="EduExamRecordResult">
+        <include refid="selectEduExamRecordVo"/>
+        where record_id = #{recordId}
+    </select>
+        
+    <insert id="insertEduExamRecord" parameterType="EduExamRecord" useGeneratedKeys="true" keyProperty="recordId">
+        insert into edu_exam_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="examId != null">exam_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="score != null">score,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="answers != null">answers,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="examId != null">#{examId},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="answers != null">#{answers},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduExamRecord" parameterType="EduExamRecord">
+        update edu_exam_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="examId != null">exam_id = #{examId},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="answers != null">answers = #{answers},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where record_id = #{recordId}
+    </update>
+
+    <delete id="deleteEduExamRecordByRecordId" parameterType="Long">
+        delete from edu_exam_record where record_id = #{recordId}
+    </delete>
+
+    <delete id="deleteEduExamRecordByRecordIds" parameterType="String">
+        delete from edu_exam_record where record_id in 
+        <foreach item="recordId" collection="array" open="(" separator="," close=")">
+            #{recordId}
+        </foreach>
+    </delete>
+</mapper>
