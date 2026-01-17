@@ -1,0 +1,1 @@
+ALTER TABLE sys_edu_homework ADD COLUMN course_id BIGINT(20) DEFAULT NULL COMMENT 'Course ID';

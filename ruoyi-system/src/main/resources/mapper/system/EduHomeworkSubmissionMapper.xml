@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.EduHomeworkSubmissionMapper">
+    
+    <resultMap type="EduHomeworkSubmission" id="EduHomeworkSubmissionResult">
+        <result property="id"    column="id"    />
+        <result property="homeworkId"    column="homework_id"    />
+        <result property="studentId"    column="student_id"    />
+        <result property="studentName"    column="student_name"    />
+        <result property="nickName"    column="nick_name"    />
+        <result property="content"    column="content"    />
+        <result property="imageUrl"    column="image_url"    />
+        <result property="fileUrl"    column="file_url"    />
+        <result property="grade"    column="grade"    />
+        <result property="gradeComment"    column="grade_comment"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="submitTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectEduHomeworkSubmissionVo">
+        select s.id, s.homework_id, s.student_id, s.student_name, s.content, s.image_url, s.file_url, s.grade, s.grade_comment, s.status, s.create_time, s.update_time, u.nick_name
+        from sys_edu_homework_submission s
+        left join sys_user u on s.student_id = u.user_id
+    </sql>
+
+    <select id="selectEduHomeworkSubmissionList" parameterType="EduHomeworkSubmission" resultMap="EduHomeworkSubmissionResult">
+        <include refid="selectEduHomeworkSubmissionVo"/>
+        <where>  
+            <if test="homeworkId != null "> and s.homework_id = #{homeworkId}</if>
+            <if test="studentId != null "> and s.student_id = #{studentId}</if>
+            <if test="studentName != null  and studentName != ''"> and s.student_name like concat('%', #{studentName}, '%')</if>
+            <if test="status != null  and status != ''"> and s.status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectEduHomeworkSubmissionById" parameterType="Long" resultMap="EduHomeworkSubmissionResult">
+        <include refid="selectEduHomeworkSubmissionVo"/>
+        where s.id = #{id}
+    </select>
+        
+    <insert id="insertEduHomeworkSubmission" parameterType="EduHomeworkSubmission" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_edu_homework_submission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="homeworkId != null">homework_id,</if>
+            <if test="studentId != null">student_id,</if>
+            <if test="studentName != null">student_name,</if>
+            <if test="content != null">content,</if>
+            <if test="imageUrl != null">image_url,</if>
+            <if test="fileUrl != null">file_url,</if>
+            <if test="grade != null">grade,</if>
+            <if test="gradeComment != null">grade_comment,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="homeworkId != null">#{homeworkId},</if>
+            <if test="studentId != null">#{studentId},</if>
+            <if test="studentName != null">#{studentName},</if>
+            <if test="content != null">#{content},</if>
+            <if test="imageUrl != null">#{imageUrl},</if>
+            <if test="fileUrl != null">#{fileUrl},</if>
+            <if test="grade != null">#{grade},</if>
+            <if test="gradeComment != null">#{gradeComment},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduHomeworkSubmission" parameterType="EduHomeworkSubmission">
+        update sys_edu_homework_submission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="homeworkId != null">homework_id = #{homeworkId},</if>
+            <if test="studentId != null">student_id = #{studentId},</if>
+            <if test="studentName != null">student_name = #{studentName},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="fileUrl != null">file_url = #{fileUrl},</if>
+            <if test="grade != null">grade = #{grade},</if>
+            <if test="gradeComment != null">grade_comment = #{gradeComment},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEduHomeworkSubmissionById" parameterType="Long">
+        delete from sys_edu_homework_submission where id = #{id}
+    </delete>
+
+    <delete id="deleteEduHomeworkSubmissionByIds" parameterType="String">
+        delete from sys_edu_homework_submission where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

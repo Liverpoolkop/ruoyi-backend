@@ -119,6 +119,13 @@
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
 
+        <!-- Minio -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.2</version>
+        </dependency>
+
     </dependencies>
 
 </project>
