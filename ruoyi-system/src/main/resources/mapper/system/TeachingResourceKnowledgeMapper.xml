@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TeachingResourceKnowledgeMapper">
+
+    <resultMap type="TeachingResourceKnowledge" id="TeachingResourceKnowledgeResult">
+        <result property="id" column="id"/>
+        <result property="resourceType" column="resource_type"/>
+        <result property="resourceId" column="resource_id"/>
+        <result property="knowledgeId" column="knowledge_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="resourceName" column="resource_name"/>
+        <result property="knowledgeName" column="knowledge_name"/>
+    </resultMap>
+
+    <resultMap type="Knowledge" id="KnowledgeResult">
+        <!-- Knowledge字段映射 -->
+        <result property="knowledgeId" column="knowledge_id"/>
+        <result property="knowledgeName" column="knowledge_name"/>
+        <result property="knowledgeCode" column="knowledge_code"/>
+        <result property="difficultyLevel" column="difficulty_level"/>
+        <result property="keywords" column="keywords"/>
+        <result property="content" column="content"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="chapterName" column="chapter_name"/>
+        <result property="courseName" column="course_name"/>
+    </resultMap>
+
+    <sql id="selectTeachingResourceKnowledgeVo">
+        select r.id, r.resource_type, r.resource_id, r.knowledge_id, r.create_time,
+               case r.resource_type
+                   when 'homework' then h.homework_name
+                   when 'question' then q.question_title
+                   when 'experiment' then e.experiment_name
+                   end as resource_name,
+               k.knowledge_name
+        from sys_teaching_resource_knowledge r
+                 left join edu_knowledge k on r.knowledge_id = k.knowledge_id
+                 left join sys_homework h on r.resource_type = 'homework' and r.resource_id = h.homework_id
+                 left join sys_question q on r.resource_type = 'question' and r.resource_id = q.question_id
+                 left join sys_experiment e on r.resource_type = 'experiment' and r.resource_id = e.experiment_id
+    </sql>
+
+    <select id="selectTeachingResourceKnowledgeById" parameterType="Long" resultMap="TeachingResourceKnowledgeResult">
+        <include refid="selectTeachingResourceKnowledgeVo"/>
+        where r.id = #{id}
+    </select>
+
+    <select id="selectTeachingResourceKnowledgeList" parameterType="TeachingResourceKnowledge" resultMap="TeachingResourceKnowledgeResult">
+        <include refid="selectTeachingResourceKnowledgeVo"/>
+        <where>
+            <if test="resourceType != null and resourceType != ''">
+                AND r.resource_type = #{resourceType}
+            </if>
+            <if test="resourceId != null">
+                AND r.resource_id = #{resourceId}
+            </if>
+            <if test="knowledgeId != null">
+                AND r.knowledge_id = #{knowledgeId}
+            </if>
+            <if test="knowledgeName != null and knowledgeName != ''">
+                AND k.knowledge_name like concat('%', #{knowledgeName}, '%')
+            </if>
+            <if test="resourceName != null and resourceName != ''">
+                AND (
+                (r.resource_type = 'homework' and h.homework_name like concat('%', #{resourceName}, '%')) OR
+                (r.resource_type = 'question' and q.question_title like concat('%', #{resourceName}, '%')) OR
+                (r.resource_type = 'experiment' and e.experiment_name like concat('%', #{resourceName}, '%'))
+                )
+            </if>
+            <if test="courseId != null">
+                AND k.course_id = #{courseId}
+            </if>
+        </where>
+        order by r.create_time desc
+    </select>
+
+    <insert id="insertTeachingResourceKnowledge" parameterType="TeachingResourceKnowledge" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_teaching_resource_knowledge
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="resourceType != null and resourceType != ''">resource_type,</if>
+            <if test="resourceId != null">resource_id,</if>
+            <if test="knowledgeId != null">knowledge_id,</if>
+            create_time,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="resourceType != null and resourceType != ''">#{resourceType},</if>
+            <if test="resourceId != null">#{resourceId},</if>
+            <if test="knowledgeId != null">#{knowledgeId},</if>
+            sysdate(),
+        </trim>
+    </insert>
+
+    <!-- 简化版插入 -->
+    <insert id="insertAssociation">
+        insert into sys_teaching_resource_knowledge (resource_type, resource_id, knowledge_id, create_time)
+        values (#{resourceType}, #{resourceId}, #{knowledgeId}, sysdate())
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsertAssociation" parameterType="java.util.List">
+        insert into sys_teaching_resource_knowledge (resource_type, resource_id, knowledge_id, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.resourceType}, #{item.resourceId}, #{item.knowledgeId}, sysdate())
+        </foreach>
+    </insert>
+
+    <update id="updateTeachingResourceKnowledge" parameterType="TeachingResourceKnowledge">
+        update sys_teaching_resource_knowledge
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="resourceType != null and resourceType != ''">resource_type = #{resourceType},</if>
+            <if test="resourceId != null">resource_id = #{resourceId},</if>
+            <if test="knowledgeId != null">knowledge_id = #{knowledgeId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTeachingResourceKnowledgeById" parameterType="Long">
+        delete from sys_teaching_resource_knowledge where id = #{id}
+    </delete>
+
+    <delete id="deleteTeachingResourceKnowledgeByIds" parameterType="Long">
+        delete from sys_teaching_resource_knowledge where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByResource">
+        delete from sys_teaching_resource_knowledge
+        where resource_type = #{resourceType} and resource_id = #{resourceId}
+    </delete>
+
+    <delete id="deleteByKnowledgeId" parameterType="Long">
+        delete from sys_teaching_resource_knowledge where knowledge_id = #{knowledgeId}
+    </delete>
+
+    <!-- 查询资源关联的知识点 -->
+    <select id="selectKnowledgeByResource" resultMap="KnowledgeResult">
+        select k.knowledge_id, k.knowledge_name, k.knowledge_code, k.difficulty_level,
+               k.keywords, k.content, k.chapter_id, k.course_id,
+               c.chapter_name, co.course_name
+        from sys_teaching_resource_knowledge r
+                 inner join edu_knowledge k on r.knowledge_id = k.knowledge_id
+                 left join sys_chapter c on k.chapter_id = c.chapter_id
+                 left join sys_course co on k.course_id = co.course_id
+        where r.resource_type = #{resourceType} and r.resource_id = #{resourceId}
+        order by k.knowledge_name
+    </select>
+
+    <!-- 查询知识点关联的资源 -->
+    <select id="selectResourcesByKnowledgeId" parameterType="Long" resultMap="TeachingResourceKnowledgeResult">
+        <include refid="selectTeachingResourceKnowledgeVo"/>
+        where r.knowledge_id = #{knowledgeId}
+        order by r.resource_type, r.create_time desc
+    </select>
+
+    <!-- 统计资源关联的知识点数量 -->
+    <select id="countKnowledgeByResource" resultType="int">
+        select count(1) from sys_teaching_resource_knowledge
+        where resource_type = #{resourceType} and resource_id = #{resourceId}
+    </select>
+
+    <!-- 统计知识点关联的资源数量 -->
+    <select id="countResourcesByKnowledgeId" parameterType="Long" resultType="int">
+        select count(1) from sys_teaching_resource_knowledge
+        where knowledge_id = #{knowledgeId}
+    </select>
+</mapper>
