@@ -8,9 +8,9 @@ import com.ruoyi.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.mapper.EduChapterMapper;
-import com.ruoyi.edu.mapper.EduVideoMapper;
+import com.ruoyi.edu.mapper.EduResourceMapper;
 import com.ruoyi.system.domain.EduChapter;
-import com.ruoyi.edu.domain.EduVideo;
+import com.ruoyi.edu.domain.EduResource;
 import com.ruoyi.system.service.IEduChapterService;
 
 /**
@@ -23,7 +23,7 @@ public class EduChapterServiceImpl implements IEduChapterService
     private EduChapterMapper eduChapterMapper;
 
     @Autowired
-    private EduVideoMapper eduVideoMapper;
+    private EduResourceMapper eduResourceMapper;
 
     /**
      * 查询课程章节
@@ -54,19 +54,25 @@ public class EduChapterServiceImpl implements IEduChapterService
         EduChapter query = new EduChapter();
         query.setCourseId(courseId);
         List<EduChapter> list = eduChapterMapper.selectEduChapterList(query);
+        if (list == null) {
+            list = new ArrayList<>();
+        }
         
-        // Fetch all videos for the course
-        List<EduVideo> videoList = eduVideoMapper.selectByCourseId(courseId);
+        // Fetch all resources for the course
+        List<EduResource> resourceList = eduResourceMapper.selectByCourseId(courseId);
+        if (resourceList == null) {
+            resourceList = new ArrayList<>();
+        }
         
-        // Assign videos to chapters
+        // Assign resources to chapters
         for (EduChapter chapter : list) {
-            List<EduVideo> chapterVideos = new ArrayList<>();
-            for (EduVideo video : videoList) {
-                if (video.getChapterId().equals(chapter.getChapterId())) {
-                    chapterVideos.add(video);
+            List<EduResource> chapterResources = new ArrayList<>();
+            for (EduResource resource : resourceList) {
+                if (resource.getChapterId() != null && resource.getChapterId().equals(chapter.getChapterId())) {
+                    chapterResources.add(resource);
                 }
             }
-            chapter.setVideos(chapterVideos);
+            chapter.setResources(chapterResources);
         }
 
         List<EduChapter> returnList = new ArrayList<>();
@@ -74,7 +80,7 @@ public class EduChapterServiceImpl implements IEduChapterService
         
         // Find Roots (parentId = 0)
         for (EduChapter t : list) {
-            if (t.getParentId() == 0) {
+            if (t.getParentId() != null && t.getParentId() == 0) {
                 returnList.add(t);
                 tempList.add(t.getChapterId());
             }
@@ -108,7 +114,7 @@ public class EduChapterServiceImpl implements IEduChapterService
     private List<EduChapter> getChildList(List<EduChapter> list, EduChapter t) {
         List<EduChapter> tlist = new ArrayList<>();
         for (EduChapter n : list) {
-            if (n.getParentId() != null && n.getParentId().longValue() == t.getChapterId().longValue()) {
+            if (n.getParentId() != null && t.getChapterId() != null && n.getParentId().longValue() == t.getChapterId().longValue()) {
                 tlist.add(n);
             }
         }

@@ -45,7 +45,6 @@ public class EduCourseController extends BaseController {
     @Autowired
     private ISysNoticeService noticeService;
 
-    @PreAuthorize("@ss.hasPermi('edu:course:add')")
     @PostMapping
     public AjaxResult create(@Validated @RequestBody EduCourse c) {
         if (c.getTeacherIds() == null || c.getTeacherIds().isEmpty()) {
@@ -62,7 +61,6 @@ public class EduCourseController extends BaseController {
         return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:course:list')")
     @GetMapping("/list")
     public TableDataInfo list(EduCourse query) {
         startPage();
@@ -120,7 +118,6 @@ public class EduCourseController extends BaseController {
         return getDataTable(list);
     }
 
-    @PreAuthorize("@ss.hasPermi('system:course:edit')")
     @PutMapping
     public AjaxResult update(@Validated @RequestBody EduCourse c) {
         c.setUpdateTime(DateUtils.getNowDate());
@@ -134,7 +131,6 @@ public class EduCourseController extends BaseController {
         return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:course:remove')")
     @DeleteMapping("/{id}")
     public AjaxResult delete(@PathVariable Long id) {
         courseMapper.deleteCourseTeacherByCourseId(id);
@@ -237,6 +233,12 @@ public class EduCourseController extends BaseController {
      */
     @GetMapping("/{id}/students")
     public TableDataInfo getStudents(@PathVariable Long id) {
+        Long userId = SecurityUtils.getUserId();
+        List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+             throw new com.ruoyi.common.exception.ServiceException("只有讲师可以查看学生");
+        }
+
         startPage();
         List<SysUser> list = courseStudentMapper.selectStudentsByCourseId(id);
         return getDataTable(list);

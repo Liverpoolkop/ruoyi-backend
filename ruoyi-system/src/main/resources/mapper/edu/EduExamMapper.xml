@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduExamMapper">
+    
+    <resultMap type="EduExam" id="EduExamResult">
+        <result property="examId"    column="exam_id"    />
+        <result property="courseId"    column="course_id"    />
+        <result property="title"    column="title"    />
+        <result property="duration"    column="duration"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="totalScore"    column="total_score"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectEduExamVo">
+        select exam_id, course_id, title, duration, start_time, end_time, total_score, status, create_by, create_time, update_by, update_time, remark from edu_exam
+    </sql>
+
+    <select id="selectEduExamList" parameterType="EduExam" resultMap="EduExamResult">
+        <include refid="selectEduExamVo"/>
+        <where>  
+            <if test="courseId != null "> and course_id = #{courseId}</if>
+            <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectEduExamByExamId" parameterType="Long" resultMap="EduExamResult">
+        select a.exam_id, a.course_id, a.title, a.duration, a.start_time, a.end_time, a.total_score, a.status, a.create_by, a.create_time, a.update_by, a.update_time, a.remark,
+               b.exam_id as q_exam_id, b.question_id as q_question_id, b.score as q_score, b.sort as q_sort,
+               c.content as q_content, c.type as q_type, c.options as q_options, c.answer as q_answer
+        from edu_exam a
+        left join edu_exam_question b on a.exam_id = b.exam_id
+        left join edu_question c on b.question_id = c.id
+        where a.exam_id = #{examId}
+        order by b.sort
+    </select>
+        
+    <insert id="insertEduExam" parameterType="EduExam" useGeneratedKeys="true" keyProperty="examId">
+        insert into edu_exam
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">course_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="duration != null">duration,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="totalScore != null">total_score,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="courseId != null">#{courseId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="duration != null">#{duration},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="totalScore != null">#{totalScore},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduExam" parameterType="EduExam">
+        update edu_exam
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="courseId != null">course_id = #{courseId},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="totalScore != null">total_score = #{totalScore},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where exam_id = #{examId}
+    </update>
+
+    <delete id="deleteEduExamByExamId" parameterType="Long">
+        delete from edu_exam where exam_id = #{examId}
+    </delete>
+
+    <delete id="deleteEduExamByExamIds" parameterType="String">
+        delete from edu_exam where exam_id in 
+        <foreach item="examId" collection="array" open="(" separator="," close=")">
+            #{examId}
+        </foreach>
+    </delete>
+</mapper>

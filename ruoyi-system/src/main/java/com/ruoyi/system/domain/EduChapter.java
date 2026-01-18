@@ -3,6 +3,7 @@ package com.ruoyi.system.domain;
 import java.util.ArrayList;
 import java.util.List;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.ruoyi.edu.domain.EduResource;
 
 /**
  * 课程章节对象 edu_chapter
@@ -29,8 +30,8 @@ public class EduChapter extends BaseEntity
     /** 子章节 */
     private List<EduChapter> children = new ArrayList<>();
 
-    /** 章节视频 */
-    private List<com.ruoyi.edu.domain.EduVideo> videos = new ArrayList<>();
+    /** 章节资源 */
+    private List<EduResource> resources = new ArrayList<>();
 
     public void setChapterId(Long chapterId) 
     {
@@ -88,11 +89,11 @@ public class EduChapter extends BaseEntity
         this.children = children;
     }
 
-    public List<com.ruoyi.edu.domain.EduVideo> getVideos() {
-        return videos;
+    public List<EduResource> getResources() {
+        return resources;
     }
 
-    public void setVideos(List<com.ruoyi.edu.domain.EduVideo> videos) {
-        this.videos = videos;
+    public void setResources(List<EduResource> resources) {
+        this.resources = resources;
     }
 }

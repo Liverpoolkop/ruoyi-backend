@@ -26,6 +26,37 @@
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip>
 
+        <el-popover
+          placement="bottom"
+          width="300"
+          trigger="click"
+          popper-class="message-popover"
+          @show="loadMessages"
+        >
+          <div class="message-box">
+             <div class="message-header">
+               <span>站内信</span>
+               <el-button type="text" size="small" @click="markAllRead" v-if="unreadCount > 0">全部已读</el-button>
+             </div>
+             <div class="message-list" v-loading="msgLoading">
+               <div v-if="messageList.length === 0" class="empty-msg">暂无新消息</div>
+               <div v-else v-for="msg in messageList" :key="msg.id" class="message-item" :class="{ unread: msg.readStatus === '0' }" @click="handleRead(msg)">
+                  <div class="msg-title">{{ msg.title }}</div>
+                  <div class="msg-content">{{ msg.content }}</div>
+                  <div class="msg-time">{{ msg.createTime }}</div>
+               </div>
+             </div>
+             <div class="message-footer">
+               <router-link to="/user/profile" class="view-all">查看全部</router-link>
+             </div>
+          </div>
+          <div slot="reference" class="right-menu-item hover-effect">
+            <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="message-badge">
+              <i class="el-icon-bell" />
+            </el-badge>
+          </div>
+        </el-popover>
+
       </template>
 
       <el-dropdown class="avatar-container right-menu-item hover-effect" trigger="hover">
