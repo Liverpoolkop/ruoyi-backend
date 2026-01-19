@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.EduExamQuestionMapper">
+    
+    <resultMap type="EduExamQuestion" id="EduExamQuestionResult">
+        <result property="examId"    column="exam_id"    />
+        <result property="questionId"    column="question_id"    />
+        <result property="score"    column="score"    />
+        <result property="sort"    column="sort"    />
+        <result property="content"    column="content"    />
+        <result property="questionType"    column="type"    />
+        <result property="options"    column="options"    />
+        <result property="answer"    column="answer"    />
+    </resultMap>
+
+    <sql id="selectEduExamQuestionVo">
+        select a.exam_id, a.question_id, a.score, a.sort, b.content, b.type, b.options, b.answer 
+        from edu_exam_question a
+        left join edu_question b on a.question_id = b.id
+    </sql>
+
+    <select id="selectEduExamQuestionList" parameterType="EduExamQuestion" resultMap="EduExamQuestionResult">
+        <include refid="selectEduExamQuestionVo"/>
+        <where>  
+            <if test="examId != null "> and exam_id = #{examId}</if>
+            <if test="questionId != null "> and question_id = #{questionId}</if>
+        </where>
+    </select>
+    
+    <select id="selectEduExamQuestionByExamId" parameterType="Long" resultMap="EduExamQuestionResult">
+        <include refid="selectEduExamQuestionVo"/>
+        where exam_id = #{examId}
+    </select>
+        
+    <insert id="insertEduExamQuestion" parameterType="EduExamQuestion">
+        insert into edu_exam_question
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="examId != null">exam_id,</if>
+            <if test="questionId != null">question_id,</if>
+            <if test="score != null">score,</if>
+            <if test="sort != null">sort,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="examId != null">#{examId},</if>
+            <if test="questionId != null">#{questionId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="sort != null">#{sort},</if>
+         </trim>
+    </insert>
+
+    <update id="updateEduExamQuestion" parameterType="EduExamQuestion">
+        update edu_exam_question
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="questionId != null">question_id = #{questionId},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="sort != null">sort = #{sort},</if>
+        </trim>
+        where exam_id = #{examId}
+    </update>
+
+    <delete id="deleteEduExamQuestionByExamId" parameterType="Long">
+        delete from edu_exam_question where exam_id = #{examId}
+    </delete>
+
+    <delete id="deleteEduExamQuestionByExamIds" parameterType="String">
+        delete from edu_exam_question where exam_id in 
+        <foreach item="examId" collection="array" open="(" separator="," close=")">
+            #{examId}
+        </foreach>
+    </delete>
+</mapper>

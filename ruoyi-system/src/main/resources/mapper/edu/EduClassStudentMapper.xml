@@ -6,10 +6,11 @@
     <result column="class_id" property="classId"/>
     <result column="student_id" property="studentId"/>
     <result column="student_name" property="studentName"/>
+    <result column="nick_name" property="nickName"/>
   </resultMap>
 
   <select id="selectByClassId" resultMap="EduClassStudentMap">
-    SELECT s.id, s.class_id, s.student_id, u.user_name AS student_name
+    SELECT s.id, s.class_id, s.student_id, u.user_name AS student_name, u.nick_name
     FROM edu_class_student s
     LEFT JOIN sys_user u ON u.user_id = s.student_id
     WHERE s.class_id = #{classId}

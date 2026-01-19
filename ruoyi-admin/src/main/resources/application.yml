@@ -90,7 +90,7 @@ spring:
     # 数据库索引
     database: 0
     # 密码
-    password:
+    password: 
     # 连接超时时间
     timeout: 10s
     lettuce:
@@ -147,6 +147,13 @@ xss:
   # 过滤开关
   enabled: true
   # 排除链接（多个用逗号分隔）
-  excludes: /system/notice
+  excludes: /system/notice,/system/homework
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+
+# Minio 配置
+minio:
+  url: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucketName: edu-video

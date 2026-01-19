@@ -45,7 +45,6 @@ public class EduCourseController extends BaseController {
     @Autowired
     private ISysNoticeService noticeService;
 
-    @PreAuthorize("@ss.hasPermi('edu:course:add')")
     @PostMapping
     public AjaxResult create(@Validated @RequestBody EduCourse c) {
         if (c.getTeacherIds() == null || c.getTeacherIds().isEmpty()) {
@@ -62,7 +61,6 @@ public class EduCourseController extends BaseController {
         return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:course:list')")
     @GetMapping("/list")
     public TableDataInfo list(EduCourse query) {
         startPage();
@@ -120,7 +118,6 @@ public class EduCourseController extends BaseController {
         return getDataTable(list);
     }
 
-    @PreAuthorize("@ss.hasPermi('system:course:edit')")
     @PutMapping
     public AjaxResult update(@Validated @RequestBody EduCourse c) {
         c.setUpdateTime(DateUtils.getNowDate());
@@ -134,7 +131,6 @@ public class EduCourseController extends BaseController {
         return toAjax(rows);
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:course:remove')")
     @DeleteMapping("/{id}")
     public AjaxResult delete(@PathVariable Long id) {
         courseMapper.deleteCourseTeacherByCourseId(id);
@@ -146,7 +142,7 @@ public class EduCourseController extends BaseController {
     public AjaxResult invite(@PathVariable Long id, @RequestParam(defaultValue = "24") Integer hours) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
              return AjaxResult.error("只有本课程讲师可以生成邀请码");
         }
         
@@ -208,7 +204,7 @@ public class EduCourseController extends BaseController {
     public AjaxResult addNotice(@PathVariable Long id, @RequestBody SysNotice notice) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
              return AjaxResult.error("只有讲师可以发布公告");
         }
         notice.setRemark("course:" + id);
@@ -222,7 +218,7 @@ public class EduCourseController extends BaseController {
     public AjaxResult deleteNotice(@PathVariable Long id, @PathVariable Long noticeId) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
              return AjaxResult.error("只有讲师可以删除公告");
         }
         SysNotice existing = noticeService.selectNoticeById(noticeId);
@@ -237,6 +233,12 @@ public class EduCourseController extends BaseController {
      */
     @GetMapping("/{id}/students")
     public TableDataInfo getStudents(@PathVariable Long id) {
+        Long userId = SecurityUtils.getUserId();
+        List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             throw new com.ruoyi.common.exception.ServiceException("只有讲师可以查看学生");
+        }
+
         startPage();
         List<SysUser> list = courseStudentMapper.selectStudentsByCourseId(id);
         return getDataTable(list);
@@ -251,8 +253,9 @@ public class EduCourseController extends BaseController {
         
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
-             return AjaxResult.error("只有讲师可以添加学生");
+        boolean isTeacher = teacherIds.stream().anyMatch(tid -> tid != null && tid.equals(userId));
+        if (!isTeacher && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             return AjaxResult.error("只有讲师可以添加学生 (uid=" + userId + ", cid=" + id + ", teachers=" + teacherIds + ")");
         }
 
         List<EduCourseStudent> existing = courseStudentMapper.selectByCourseId(id);
@@ -283,7 +286,7 @@ public class EduCourseController extends BaseController {
     public AjaxResult removeStudent(@PathVariable Long id, @PathVariable Long studentId) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
              return AjaxResult.error("只有讲师可以移除学生");
         }
         return toAjax(courseStudentMapper.delete(id, studentId));
@@ -296,8 +299,9 @@ public class EduCourseController extends BaseController {
     public AjaxResult addStudentsFromClass(@PathVariable Long id, @PathVariable Long classId) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
-             return AjaxResult.error("只有讲师可以添加学生");
+        boolean isTeacher = teacherIds.stream().anyMatch(tid -> tid != null && tid.equals(userId));
+        if (!isTeacher && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             return AjaxResult.error("只有讲师可以添加学生 (uid=" + userId + ", cid=" + id + ", teachers=" + teacherIds + ")");
         }
 
         List<EduClassStudent> classStudents = classStudentMapper.selectByClassId(classId);
@@ -331,7 +335,7 @@ public class EduCourseController extends BaseController {
     public AjaxResult importStudents(@PathVariable Long id, MultipartFile file) throws Exception {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId)) {
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
              return AjaxResult.error("只有讲师可以导入学生");
         }
 
