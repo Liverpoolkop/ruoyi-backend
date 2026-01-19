@@ -10,6 +10,7 @@ public class EduClass extends BaseEntity {
     private Long teacherId;
     private String status;
     private String teacherName;
+    private String nickName;
     private String majorName;
     private Long studentCount;
 
@@ -27,6 +28,8 @@ public class EduClass extends BaseEntity {
     public void setStatus(String status) { this.status = status; }
     public String getTeacherName() { return teacherName; }
     public void setTeacherName(String teacherName) { this.teacherName = teacherName; }
+    public String getNickName() { return nickName; }
+    public void setNickName(String nickName) { this.nickName = nickName; }
     public String getMajorName() { return majorName; }
     public void setMajorName(String majorName) { this.majorName = majorName; }
     public Long getStudentCount() { return studentCount; }

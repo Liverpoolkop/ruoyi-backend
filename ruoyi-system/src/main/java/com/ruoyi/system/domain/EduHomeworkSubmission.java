@@ -19,26 +19,11 @@ public class EduHomeworkSubmission extends BaseEntity {
     private Long homeworkId;
 
     /** Student ID */
-    @Excel(name = "学号")
     private Long studentId;
 
-    /** Student Nickname */
-    @Excel(name = "姓名")
-    private String nickName;
-
     /** Student Name */
+    @Excel(name = "学号")
     private String studentName;
-
-    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
-    private Date submitTime;
-
-    /** Grade */
-    @Excel(name = "成绩")
-    private String grade;
-
-    /** Grade Comment */
-    @Excel(name = "评语")
-    private String gradeComment;
 
     /** Content */
     private String content;
@@ -49,16 +34,34 @@ public class EduHomeworkSubmission extends BaseEntity {
     /** File URL */
     private String fileUrl;
 
+    /** Grade */
+    @Excel(name = "成绩")
+    private String grade;
+
+    /** Grade Comment */
+    @Excel(name = "评语")
+    private String gradeComment;
+
     /** Status (0=Draft, 1=Submitted, 2=Graded) */
     private String status;
 
+    /** Student Nickname */
+    @Excel(name = "姓名")
+    private String nickName;
+    
+    @Excel(name = "提交时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date submitTime;
+
     public Date getSubmitTime() {
-        return submitTime;
+        return getCreateTime();
     }
 
     public void setSubmitTime(Date submitTime) {
-        this.submitTime = submitTime;
+        // Virtual field for export
     }
+
+    // Additional fields like Title for display could be added if needed, but
+    // keeping it strict to table for now or using joining in Mapper
 
     public void setId(Long id) {
         this.id = id;

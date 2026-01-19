@@ -35,7 +35,6 @@ public class EduClassController extends BaseController {
     @Autowired
     private ISysUserService userService;
 
-    @PreAuthorize("@ss.hasPermi('edu:class:add')")
     @PostMapping
     public AjaxResult create(@Validated @RequestBody EduClass c) {
         c.setCreateBy(getUsername());
@@ -49,7 +48,6 @@ public class EduClassController extends BaseController {
         return toAjax(classService.create(c));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:invite')")
     @PostMapping("/{id}/invite")
     public AjaxResult invite(@PathVariable Long id, @RequestParam(defaultValue = "24") Integer hours) {
         String code = IdUtils.fastSimpleUUID().substring(0, 8);
@@ -64,7 +62,6 @@ public class EduClassController extends BaseController {
         return AjaxResult.success(data);
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:join')")
     @PostMapping("/{id}/join")
     public AjaxResult join(@PathVariable Long id) {
         Long userId = SecurityUtils.getUserId();
@@ -78,7 +75,7 @@ public class EduClassController extends BaseController {
         return toAjax(classStudentMapper.insert(rel));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:join')")
+   
     @PostMapping("/join/by-code")
     public AjaxResult joinByCode(@RequestParam String code) {
         String codeKey = "edu:invite:code:" + code;
@@ -91,7 +88,6 @@ public class EduClassController extends BaseController {
         return AjaxResult.error("类型错误");
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:list')")
     @GetMapping("/list")
     public TableDataInfo list(EduClass query) {
         startPage();
@@ -153,20 +149,19 @@ public class EduClassController extends BaseController {
         return r;
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:edit')")
     @PutMapping
     public AjaxResult update(@Validated @RequestBody EduClass c) {
         c.setUpdateBy(getUsername());
         return toAjax(classService.update(c));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:remove')")
+
     @DeleteMapping("/{id}")
     public AjaxResult delete(@PathVariable Long id) {
         return toAjax(classService.delete(id));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:students:add')")
+
     @PostMapping("/{id}/students")
     public AjaxResult addStudent(@PathVariable Long id, @RequestBody EduClassStudent rel) {
         rel.setClassId(id);
@@ -174,13 +169,12 @@ public class EduClassController extends BaseController {
         return toAjax(classStudentMapper.insert(rel));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:students:remove')")
+
     @DeleteMapping("/{id}/students/{studentId}")
     public AjaxResult removeStudent(@PathVariable Long id, @PathVariable Long studentId) {
         return toAjax(classStudentMapper.delete(id, studentId));
     }
 
-    @PreAuthorize("@ss.hasPermi('edu:class:students:add')")
     @PostMapping("/{id}/students/batch")
     public AjaxResult addStudentBatch(@PathVariable Long id, @RequestBody java.util.List<Long> studentIds) {
         java.util.List<EduClassStudent> exists = classStudentMapper.selectByClassId(id);
