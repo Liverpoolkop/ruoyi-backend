@@ -253,8 +253,9 @@ public class EduCourseController extends BaseController {
         
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
-             return AjaxResult.error("只有讲师可以添加学生");
+        boolean isTeacher = teacherIds.stream().anyMatch(tid -> tid != null && tid.equals(userId));
+        if (!isTeacher && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             return AjaxResult.error("只有讲师可以添加学生 (uid=" + userId + ", cid=" + id + ", teachers=" + teacherIds + ")");
         }
 
         List<EduCourseStudent> existing = courseStudentMapper.selectByCourseId(id);
@@ -298,8 +299,9 @@ public class EduCourseController extends BaseController {
     public AjaxResult addStudentsFromClass(@PathVariable Long id, @PathVariable Long classId) {
         Long userId = SecurityUtils.getUserId();
         List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
-        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
-             return AjaxResult.error("只有讲师可以添加学生");
+        boolean isTeacher = teacherIds.stream().anyMatch(tid -> tid != null && tid.equals(userId));
+        if (!isTeacher && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             return AjaxResult.error("只有讲师可以添加学生 (uid=" + userId + ", cid=" + id + ", teachers=" + teacherIds + ")");
         }
 
         List<EduClassStudent> classStudents = classStudentMapper.selectByClassId(classId);
