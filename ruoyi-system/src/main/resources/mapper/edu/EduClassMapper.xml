@@ -13,13 +13,14 @@
     <result column="update_by" property="updateBy"/>
     <result column="update_time" property="updateTime"/>
     <result column="teacher_name" property="teacherName"/>
+    <result column="nick_name" property="nickName"/>
     <result column="major_name" property="majorName"/>
     <result column="student_count" property="studentCount"/>
   </resultMap>
 
   <sql id="Base_Column_List">
     c.class_id, c.class_name, c.grade, c.major_id, c.teacher_id, c.status, c.create_by, c.create_time, c.update_by, c.update_time,
-    u.user_name AS teacher_name, m.major_name AS major_name,
+    u.user_name AS teacher_name, u.nick_name AS nick_name, m.major_name AS major_name,
     (SELECT count(1) FROM edu_class_student cs WHERE cs.class_id = c.class_id) as student_count
   </sql>
 
