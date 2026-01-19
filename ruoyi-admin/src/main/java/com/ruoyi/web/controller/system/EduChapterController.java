@@ -43,7 +43,7 @@ public class EduChapterController extends BaseController
     /**
      * 查询课程章节列表（平铺，用于管理）
      */
-    @PreAuthorize("@ss.hasPermi('system:course:list')")
+    //@PreAuthorize("@ss.hasPermi('system:course:list')")
     @GetMapping("/list")
     public AjaxResult list(EduChapter eduChapter)
     {
@@ -54,7 +54,7 @@ public class EduChapterController extends BaseController
     /**
      * 获取课程章节详细信息
      */
-    @PreAuthorize("@ss.hasPermi('system:course:query')")
+    //@PreAuthorize("@ss.hasPermi('system:course:query')")
     @GetMapping(value = "/{chapterId}")
     public AjaxResult getInfo(@PathVariable("chapterId") Long chapterId)
     {
@@ -64,7 +64,7 @@ public class EduChapterController extends BaseController
     /**
      * 新增课程章节
      */
-    @PreAuthorize("@ss.hasPermi('system:course:add')")
+    //@PreAuthorize("@ss.hasPermi('system:course:add')")
     @Log(title = "课程章节", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody EduChapter eduChapter)
@@ -75,7 +75,7 @@ public class EduChapterController extends BaseController
     /**
      * 修改课程章节
      */
-    @PreAuthorize("@ss.hasPermi('system:course:edit')")
+    //@PreAuthorize("@ss.hasPermi('system:course:edit')")
     @Log(title = "课程章节", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody EduChapter eduChapter)
@@ -86,7 +86,7 @@ public class EduChapterController extends BaseController
     /**
      * 删除课程章节
      */
-    @PreAuthorize("@ss.hasPermi('system:course:remove')")
+    //@PreAuthorize("@ss.hasPermi('system:course:remove')")
     @Log(title = "课程章节", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{chapterIds}")
     public AjaxResult remove(@PathVariable Long[] chapterIds)

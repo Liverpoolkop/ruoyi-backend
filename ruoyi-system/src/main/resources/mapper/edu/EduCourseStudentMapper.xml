@@ -9,7 +9,11 @@
   </resultMap>
 
   <select id="selectByCourseId" resultMap="RelMap">
-    SELECT course_id, student_id, create_by, create_time FROM edu_course_student WHERE course_id = #{courseId}
+    SELECT course_id, student_id, create_by, create_time, status FROM edu_course_student WHERE course_id = #{courseId}
+  </select>
+
+  <select id="selectByCourseIdAndStatus" resultMap="RelMap">
+    SELECT course_id, student_id, create_by, create_time, status FROM edu_course_student WHERE course_id = #{courseId} AND status = #{status}
   </select>
 
   <select id="selectJoinedCourseIds" resultType="java.lang.Long">
@@ -25,16 +29,20 @@
   </select>
 
   <insert id="insert" parameterType="com.ruoyi.edu.domain.EduCourseStudent">
-    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time)
-    VALUES(#{courseId}, #{studentId}, #{createBy}, #{createTime})
+    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time, status)
+    VALUES(#{courseId}, #{studentId}, #{createBy}, #{createTime}, #{status})
   </insert>
 
   <insert id="batchInsert" parameterType="java.util.List">
-    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time) VALUES
+    INSERT INTO edu_course_student(course_id, student_id, create_by, create_time, status) VALUES
     <foreach collection="list" item="item" index="index" separator=",">
-      (#{item.courseId}, #{item.studentId}, #{item.createBy}, #{item.createTime})
+      (#{item.courseId}, #{item.studentId}, #{item.createBy}, #{item.createTime}, #{item.status})
     </foreach>
   </insert>
+
+  <update id="updateStatus">
+    UPDATE edu_course_student SET status = #{status} WHERE course_id = #{courseId} AND student_id = #{studentId}
+  </update>
 
   <delete id="delete">
     DELETE FROM edu_course_student WHERE course_id = #{courseId} AND student_id = #{studentId}

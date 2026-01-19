@@ -15,6 +15,15 @@ public class EduCourse extends BaseEntity {
     private Integer lessonHours;
     private Integer studentCount;
     private Long teacherId;
+    private Boolean approvalRequired;
+    
+    // Non-DB Field
+    private boolean isTeacher;
+    public boolean getIsTeacher() { return isTeacher; }
+    public void setIsTeacher(boolean isTeacher) { this.isTeacher = isTeacher; }
+
+    public Boolean getApprovalRequired() { return approvalRequired; }
+    public void setApprovalRequired(Boolean approvalRequired) { this.approvalRequired = approvalRequired; }
 
     public Long getTeacherId() { return teacherId; }
     public void setTeacherId(Long teacherId) { this.teacherId = teacherId; }
