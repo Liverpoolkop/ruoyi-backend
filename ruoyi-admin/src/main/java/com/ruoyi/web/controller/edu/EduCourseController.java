@@ -65,6 +65,17 @@ public class EduCourseController extends BaseController {
     public TableDataInfo list(EduCourse query) {
         startPage();
         List<EduCourse> list = courseMapper.selectList(query);
+        Long userId = SecurityUtils.getUserId();
+        boolean isAdmin = SecurityUtils.isAdmin(userId) || SecurityUtils.hasRole("admin");
+        
+        for (EduCourse c : list) {
+            if (isAdmin) {
+                c.setIsTeacher(true);
+            } else {
+                List<Long> tids = courseMapper.selectTeacherIdsByCourseId(c.getCourseId());
+                c.setIsTeacher(tids.contains(userId));
+            }
+        }
         return getDataTable(list);
     }
 
@@ -123,8 +134,10 @@ public class EduCourseController extends BaseController {
         c.setUpdateTime(DateUtils.getNowDate());
         int rows = courseMapper.update(c);
         if (rows > 0) {
-            courseMapper.deleteCourseTeacherByCourseId(c.getCourseId());
+            // Only update teachers if teacherIds is provided and not empty
+            // This prevents accidental clearing of teachers when updating partial info (like from frontend learn page)
             if (c.getTeacherIds() != null && !c.getTeacherIds().isEmpty()) {
+                courseMapper.deleteCourseTeacherByCourseId(c.getCourseId());
                 courseMapper.batchInsertCourseTeacher(c.getCourseId(), c.getTeacherIds());
             }
         }
@@ -165,12 +178,63 @@ public class EduCourseController extends BaseController {
         java.util.List<EduCourseStudent> exists = courseStudentMapper.selectByCourseId(id);
         boolean has = exists.stream().anyMatch(s -> s.getStudentId().equals(userId));
         if (has) return AjaxResult.error("您已加入该课程，无需重复加入");
+        
+        EduCourse course = courseMapper.selectById(id);
+        if (course == null) return AjaxResult.error("课程不存在");
+
+        boolean isTeacher = false;
+        try {
+            // Check if current user has teacher role
+            SysUser user = userService.selectUserById(userId);
+            isTeacher = user.getRoles().stream().anyMatch(r -> "teacher".equals(r.getRoleKey()));
+        } catch (Exception e) {}
+
+        boolean needApproval = (course.getApprovalRequired() != null && course.getApprovalRequired()) || isTeacher;
+
         EduCourseStudent rel = new EduCourseStudent();
         rel.setCourseId(id);
         rel.setStudentId(userId);
         rel.setCreateBy(SecurityUtils.getUsername());
         rel.setCreateTime(DateUtils.getNowDate());
-        return toAjax(courseStudentMapper.insert(rel));
+        rel.setStatus(needApproval ? "0" : "1");
+        
+        courseStudentMapper.insert(rel);
+        return needApproval ? AjaxResult.success("申请已提交，等待审批") : AjaxResult.success("加入成功");
+    }
+
+    @PostMapping("/approve")
+    public AjaxResult approve(@RequestBody EduCourseStudent body) {
+        Long userId = SecurityUtils.getUserId();
+        Long courseId = body.getCourseId();
+        if (courseId == null || body.getStudentId() == null || body.getStatus() == null) {
+            return AjaxResult.error("参数错误");
+        }
+        
+        // 检查权限：只有课程讲师或管理员可以审批
+        List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(courseId);
+        if (!teacherIds.contains(userId) && !SecurityUtils.isAdmin(userId) && !SecurityUtils.hasRole("admin")) {
+             return AjaxResult.error("只有本课程讲师可以审批");
+        }
+        
+        return toAjax(courseStudentMapper.updateStatus(courseId, body.getStudentId(), body.getStatus()));
+    }
+
+    @GetMapping("/{id}/applicants")
+    public TableDataInfo getApplicants(@PathVariable Long id) {
+        Long userId = SecurityUtils.getUserId();
+        List<Long> teacherIds = courseMapper.selectTeacherIdsByCourseId(id);
+        boolean isAdmin = SecurityUtils.isAdmin(userId) || SecurityUtils.hasRole("admin");
+        
+        if (!teacherIds.contains(userId) && !isAdmin) {
+             throw new com.ruoyi.common.exception.ServiceException("只有讲师可以查看申请");
+        }
+
+        startPage();
+        List<EduCourseStudent> list = courseStudentMapper.selectByCourseIdAndStatus(id, "0");
+        for (EduCourseStudent s : list) {
+            s.setStudent(userService.selectUserById(s.getStudentId()));
+        }
+        return getDataTable(list);
     }
 
     @PreAuthorize("isAuthenticated()")

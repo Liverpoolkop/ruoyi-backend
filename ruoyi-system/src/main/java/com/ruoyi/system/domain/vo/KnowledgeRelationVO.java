@@ -45,4 +45,60 @@ public class KnowledgeRelationVO implements Serializable {
      * 是否是有向边
      */
     private Boolean directed = true;
+
+    public Long getSource() {
+        return source;
+    }
+
+    public void setSource(Long source) {
+        this.source = source;
+    }
+
+    public Long getTarget() {
+        return target;
+    }
+
+    public void setTarget(Long target) {
+        this.target = target;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public EdgeStyleVO getLineStyle() {
+        return lineStyle;
+    }
+
+    public void setLineStyle(EdgeStyleVO lineStyle) {
+        this.lineStyle = lineStyle;
+    }
+
+    public LabelVO getLabel() {
+        return label;
+    }
+
+    public void setLabel(LabelVO label) {
+        this.label = label;
+    }
+
+    public Boolean getDirected() {
+        return directed;
+    }
+
+    public void setDirected(Boolean directed) {
+        this.directed = directed;
+    }
 }

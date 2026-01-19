@@ -39,6 +39,9 @@
             <if test="knowledgeName != null and knowledgeName != ''">
                 AND k.knowledge_name like concat('%', #{knowledgeName}, '%')
             </if>
+            <if test="knowledgeCode != null and knowledgeCode != ''">
+                AND k.knowledge_code = #{knowledgeCode}
+            </if>
             <if test="courseId != null">
                 AND k.course_id = #{courseId}
             </if>

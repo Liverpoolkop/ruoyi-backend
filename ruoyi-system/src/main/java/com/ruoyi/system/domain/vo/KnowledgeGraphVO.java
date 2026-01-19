@@ -51,4 +51,68 @@ public class KnowledgeGraphVO implements Serializable {
      * 布局配置
      */
     private GraphLayoutVO layout;
+
+    public Long getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Long courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public String getGraphName() {
+        return graphName;
+    }
+
+    public void setGraphName(String graphName) {
+        this.graphName = graphName;
+    }
+
+    public List<KnowledgeNodeVO> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(List<KnowledgeNodeVO> nodes) {
+        this.nodes = nodes;
+    }
+
+    public List<KnowledgeRelationVO> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<KnowledgeRelationVO> links) {
+        this.links = links;
+    }
+
+    public List<GraphCategoryVO> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<GraphCategoryVO> categories) {
+        this.categories = categories;
+    }
+
+    public GraphStatsVO getStats() {
+        return stats;
+    }
+
+    public void setStats(GraphStatsVO stats) {
+        this.stats = stats;
+    }
+
+    public GraphLayoutVO getLayout() {
+        return layout;
+    }
+
+    public void setLayout(GraphLayoutVO layout) {
+        this.layout = layout;
+    }
 }

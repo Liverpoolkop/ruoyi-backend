@@ -11,4 +11,6 @@ public interface EduCourseStudentMapper {
     List<Long> selectJoinedCourseIds(Long studentId);
     int batchInsert(List<EduCourseStudent> list);
     List<com.ruoyi.common.core.domain.entity.SysUser> selectStudentsByCourseId(Long courseId);
+    int updateStatus(@org.apache.ibatis.annotations.Param("courseId") Long courseId, @org.apache.ibatis.annotations.Param("studentId") Long studentId, @org.apache.ibatis.annotations.Param("status") String status);
+    List<EduCourseStudent> selectByCourseIdAndStatus(@org.apache.ibatis.annotations.Param("courseId") Long courseId, @org.apache.ibatis.annotations.Param("status") String status);
 }

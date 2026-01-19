@@ -9,8 +9,8 @@ import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.Knowledge;
 import com.ruoyi.system.service.IKnowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -25,7 +25,6 @@ public class KnowledgeController extends BaseController {
     /**
      * 查询知识点列表
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:list')")
     @GetMapping("/list")
     public TableDataInfo list(Knowledge knowledge) {
         startPage();
@@ -36,7 +35,6 @@ public class KnowledgeController extends BaseController {
     /**
      * 导出知识点列表
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:export')")
     @Log(title = "知识点", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, Knowledge knowledge) {
@@ -46,9 +44,33 @@ public class KnowledgeController extends BaseController {
     }
 
     /**
+     * 获取导入模板
+     */
+    @PostMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse response)
+    {
+        // Generate template
+        ExcelUtil<Knowledge> util = new ExcelUtil<>(Knowledge.class);
+        util.importTemplateExcel(response, "知识点数据");
+    }
+
+    /**
+     * 导入知识点
+     */
+    @Log(title = "知识点", businessType = BusinessType.IMPORT)
+    @PostMapping("/importData")
+    public AjaxResult importData(MultipartFile file, boolean updateSupport, Long courseId) throws Exception
+    {
+        ExcelUtil<Knowledge> util = new ExcelUtil<>(Knowledge.class);
+        List<Knowledge> knowledgeList = util.importExcel(file.getInputStream());
+        String message = knowledgeService.importKnowledge(knowledgeList, updateSupport, courseId);
+        return success(message);
+    }
+
+    /**
      * 获取知识点详细信息
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:query')")
+    //@PreAuthorize("@ss.hasPermi('edu:knowledge:query')")
     @GetMapping(value = "/{knowledgeId}")
     public AjaxResult getInfo(@PathVariable("knowledgeId") Long knowledgeId) {
         return success(knowledgeService.selectKnowledgeById(knowledgeId));
@@ -57,7 +79,7 @@ public class KnowledgeController extends BaseController {
     /**
      * 新增知识点
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:add')")
+    //@PreAuthorize("@ss.hasPermi('edu:knowledge:add')")
     @Log(title = "知识点", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Knowledge knowledge) {
@@ -67,7 +89,7 @@ public class KnowledgeController extends BaseController {
     /**
      * 修改知识点
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:edit')")
+    //@PreAuthorize("@ss.hasPermi('edu:knowledge:edit')")
     @Log(title = "知识点", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody Knowledge knowledge) {
@@ -77,7 +99,7 @@ public class KnowledgeController extends BaseController {
     /**
      * 删除知识点
      */
-    @PreAuthorize("@ss.hasPermi('edu:knowledge:remove')")
+    //@PreAuthorize("@ss.hasPermi('edu:knowledge:remove')")
     @Log(title = "知识点", businessType = BusinessType.DELETE)
     @DeleteMapping("/{knowledgeIds}")
     public AjaxResult remove(@PathVariable Long[] knowledgeIds) {

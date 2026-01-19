@@ -67,4 +67,92 @@ public class KnowledgeNodeVO implements Serializable {
      * 扩展属性（存储原始数据）
      */
     private Object extra;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public Integer getSymbolSize() {
+        return symbolSize;
+    }
+
+    public void setSymbolSize(Integer symbolSize) {
+        this.symbolSize = symbolSize;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public Double getX() {
+        return x;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+
+    public Double getY() {
+        return y;
+    }
+
+    public void setY(Double y) {
+        this.y = y;
+    }
+
+    public Boolean getFixed() {
+        return fixed;
+    }
+
+    public void setFixed(Boolean fixed) {
+        this.fixed = fixed;
+    }
+
+    public NodeStyleVO getItemStyle() {
+        return itemStyle;
+    }
+
+    public void setItemStyle(NodeStyleVO itemStyle) {
+        this.itemStyle = itemStyle;
+    }
+
+    public LabelVO getLabel() {
+        return label;
+    }
+
+    public void setLabel(LabelVO label) {
+        this.label = label;
+    }
+
+    public Object getExtra() {
+        return extra;
+    }
+
+    public void setExtra(Object extra) {
+        this.extra = extra;
+    }
 }

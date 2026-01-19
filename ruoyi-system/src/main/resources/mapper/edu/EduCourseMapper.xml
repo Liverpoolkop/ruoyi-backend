@@ -14,10 +14,11 @@
     <result column="major_name" property="majorName"/>
     <result column="student_count" property="studentCount"/>
     <result column="lesson_hours" property="lessonHours"/>
+    <result column="approval_required" property="approvalRequired"/>
   </resultMap>
 
   <sql id="Base_Column_List">
-    c.course_id, c.course_name, c.major_id, c.course_desc, c.status, c.course_img, c.create_time, c.update_time, c.lesson_hours, m.major_name AS major_name
+    c.course_id, c.course_name, c.major_id, c.course_desc, c.status, c.course_img, c.create_time, c.update_time, c.lesson_hours, c.approval_required, m.major_name AS major_name
   </sql>
 
   <select id="selectById" resultMap="EduCourseMap">
@@ -52,13 +53,13 @@
   </select>
 
   <insert id="insert" parameterType="com.ruoyi.edu.domain.EduCourse" useGeneratedKeys="true" keyProperty="courseId">
-    INSERT INTO edu_course (course_name, major_id, course_desc, status, course_img, lesson_hours, create_time)
-    VALUES (#{courseName}, #{majorId}, #{courseDesc}, #{status}, #{courseImg}, #{lessonHours}, #{createTime})
+    INSERT INTO edu_course (course_name, major_id, course_desc, status, course_img, lesson_hours, create_time, approval_required)
+    VALUES (#{courseName}, #{majorId}, #{courseDesc}, #{status}, #{courseImg}, #{lessonHours}, #{createTime}, #{approvalRequired})
   </insert>
 
   <update id="update" parameterType="com.ruoyi.edu.domain.EduCourse">
     UPDATE edu_course
-    SET course_name=#{courseName}, major_id=#{majorId}, course_desc=#{courseDesc}, status=#{status}, course_img=#{courseImg}, lesson_hours=#{lessonHours}, update_time=#{updateTime}
+    SET course_name=#{courseName}, major_id=#{majorId}, course_desc=#{courseDesc}, status=#{status}, course_img=#{courseImg}, lesson_hours=#{lessonHours}, update_time=#{updateTime}, approval_required=#{approvalRequired}
     WHERE course_id = #{courseId}
   </update>
 

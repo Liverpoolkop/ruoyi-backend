@@ -48,12 +48,15 @@ public class Knowledge extends BaseEntity {
     private String status;
 
     /** 章节名称 */
+    @Excel(name = "所属章节")
     private String chapterName;
 
     /** 课程名称 */
+    @Excel(name = "所属课程")
     private String courseName;
 
     /** 父知识点名称 */
+    @Excel(name = "父知识点")
     private String parentName;
 
     // ============== 补全所有 getter 和 setter 方法 ==============
