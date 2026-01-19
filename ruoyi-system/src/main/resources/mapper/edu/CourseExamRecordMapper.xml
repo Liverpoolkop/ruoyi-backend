@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.edu.mapper.CourseExamRecordMapper">
+
+    <resultMap type="com.ruoyi.edu.domain.CourseExamRecord" id="RecordResult">
+        <id property="id" column="id"/>
+        <result property="examId" column="exam_id"/>
+        <result property="studentId" column="student_id"/>
+        <result property="status" column="status"/>
+        <result property="startTime" column="start_time"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="cheatCount" column="cheat_count"/>
+        <result property="objectiveScore" column="objective_score"/>
+        <result property="subjectiveScore" column="subjective_score"/>
+        <result property="totalScore" column="total_score"/>
+        <result property="teacherComment" column="teacher_comment"/>
+    </resultMap>
+
+    <select id="selectByExamAndStudent" resultMap="RecordResult">
+        SELECT * FROM edu_course_exam_record WHERE exam_id = #{examId} AND student_id = #{studentId}
+    </select>
+
+    <select id="selectById" resultMap="RecordResult">
+        SELECT * FROM edu_course_exam_record WHERE id = #{id}
+    </select>
+
+    <insert id="insertRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO edu_course_exam_record(exam_id, student_id, status, start_time, cheat_count)
+        VALUES (#{examId}, #{studentId}, #{status}, #{startTime}, #{cheatCount})
+    </insert>
+
+    <update id="updateRecord">
+        UPDATE edu_course_exam_record
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="submitTime != null">submit_time = #{submitTime},</if>
+            <if test="cheatCount != null">cheat_count = #{cheatCount},</if>
+            <if test="objectiveScore != null">objective_score = #{objectiveScore},</if>
+            <if test="totalScore != null">total_score = #{totalScore},</if>
+            <if test="subjectiveScore != null">subjective_score = #{subjectiveScore},</if>
+            <if test="teacherComment != null">teacher_comment = #{teacherComment},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertAnswer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO edu_course_exam_answer(record_id, question_id, student_answer, score, status)
+        VALUES (#{recordId}, #{questionId}, #{studentAnswer}, #{score}, #{status})
+    </insert>
+
+    <select id="selectRecordList" resultMap="RecordResult">
+        SELECT r.*, u.nick_name as studentName 
+        FROM edu_course_exam_record r
+        LEFT JOIN sys_user u ON r.student_id = u.user_id
+        <where>
+            <if test="examId != null"> AND r.exam_id = #{examId}</if>
+            <if test="studentId != null"> AND r.student_id = #{studentId}</if>
+            <if test="status != null and status != ''"> AND r.status = #{status}</if>
+        </where>
+        ORDER BY r.submit_time DESC
+    </select>
+
+    <select id="selectAnswerList" resultType="com.ruoyi.edu.domain.CourseExamAnswer">
+        SELECT 
+            a.id, 
+            a.record_id, 
+            a.question_id, 
+            /* 强制别名，防止数据库下划线字段没自动转成驼峰 */
+            a.student_answer as studentAnswer, 
+            a.score, 
+            a.status,
+            /* 👇 直接映射到新字段，不要用 params 👇 */
+            q.content as questionContent, 
+            q.type as questionType, 
+            q.answer as refAnswer,
+            /* 关联 eq 表获取设定的满分 */
+            ifnull(eq.score, 0) as maxScore
+        FROM edu_course_exam_answer a
+        LEFT JOIN edu_question q ON a.question_id = q.id
+        LEFT JOIN edu_course_exam_record r ON a.record_id = r.id
+        LEFT JOIN edu_course_exam_question eq ON (r.exam_id = eq.exam_id AND a.question_id = eq.question_id)
+        WHERE a.record_id = #{recordId}
+    </select>
+
+    <update id="updateAnswerScore" parameterType="com.ruoyi.edu.domain.CourseExamAnswer">
+        UPDATE edu_course_exam_answer
+        <set>
+            <if test="score != null">score = #{score},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectTotalScoreByRecordId" resultType="Integer">
+        SELECT IFNULL(SUM(score), 0) 
+        FROM edu_course_exam_answer 
+        WHERE record_id = #{recordId}
+    </select>
+
+
+    <delete id="deleteAnswersByExamIds">
+        DELETE FROM edu_course_exam_answer 
+        WHERE record_id IN (
+            SELECT id FROM edu_course_exam_record WHERE exam_id IN 
+            <foreach item="id" collection="array" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        )
+    </delete>
+
+    <delete id="deleteRecordsByExamIds">
+        DELETE FROM edu_course_exam_record WHERE exam_id IN 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="revertFinishedStatusByQuestionId">
+        UPDATE edu_course_exam_record r
+        /* 关联查询：找到含有该题目的答题记录 */
+        INNER JOIN edu_course_exam_answer a ON r.id = a.record_id
+        SET r.status = '2'  /* 退回状态 2 */
+        WHERE a.question_id = #{questionId} 
+          AND r.status = '3' /* 只有已阅卷的才需要退回 */
+    </update>
+</mapper>

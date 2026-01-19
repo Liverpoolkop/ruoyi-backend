@@ -2,8 +2,12 @@ package com.ruoyi.system.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.edu.mapper.CourseExamRecordMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ruoyi.system.mapper.EduQuestionMapper;
 import com.ruoyi.system.domain.EduQuestion;
 import com.ruoyi.system.service.IEduQuestionService;
@@ -15,6 +19,9 @@ import com.ruoyi.system.service.IEduQuestionService;
 public class EduQuestionServiceImpl implements IEduQuestionService {
     @Autowired
     private EduQuestionMapper eduQuestionMapper;
+
+    @Autowired
+    private CourseExamRecordMapper recordMapper; // 引入考试记录Mapper
 
     /**
      * Query Question
@@ -51,15 +58,24 @@ public class EduQuestionServiceImpl implements IEduQuestionService {
     }
 
     /**
-     * Update Question
-     * 
-     * @param eduQuestion Question
-     * @return Result
+     * 修改题目
      */
     @Override
+    @Transactional // 建议加上事务，保证一致性
     public int updateEduQuestion(EduQuestion eduQuestion) {
         eduQuestion.setUpdateTime(DateUtils.getNowDate());
-        return eduQuestionMapper.updateEduQuestion(eduQuestion);
+        
+        // 1. 执行原有的题目更新
+        int rows = eduQuestionMapper.updateEduQuestion(eduQuestion);
+        
+        // 2. 【核心新增逻辑】
+        // 如果题目更新成功，则找到所有引用了该题目且已阅卷(status=3)的试卷，
+        // 将它们的状态退回待阅卷(status=2)，强制老师重新确认分数。
+        if (rows > 0) {
+            recordMapper.revertFinishedStatusByQuestionId(eduQuestion.getId());
+        }
+        
+        return rows;
     }
 
     /**

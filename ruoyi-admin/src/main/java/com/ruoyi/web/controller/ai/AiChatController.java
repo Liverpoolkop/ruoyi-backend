@@ -1,9 +1,11 @@
 package com.ruoyi.web.controller.ai;
 
-import com.ruoyi.common.annotation.Anonymous;
 import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.web.controller.ai.domain.ChatRequest;
 import com.ruoyi.web.controller.ai.domain.ChatResponse;
+import com.ruoyi.web.controller.ai.domain.SysAiHistory;
+import com.ruoyi.web.controller.ai.mapper.SysAiHistoryMapper;
 import com.volcengine.ark.runtime.model.responses.constant.ResponsesConstants;
 import com.volcengine.ark.runtime.model.responses.content.InputContentItemText;
 import com.volcengine.ark.runtime.model.responses.content.OutputContentItemText;
@@ -13,16 +15,13 @@ import com.volcengine.ark.runtime.model.responses.item.MessageContent;
 import com.volcengine.ark.runtime.model.responses.request.CreateResponsesRequest;
 import com.volcengine.ark.runtime.model.responses.request.ResponsesInput;
 import com.volcengine.ark.runtime.model.responses.response.ResponseObject;
-import com.volcengine.ark.runtime.model.responses.tool.ToolWebSearch;
 import com.volcengine.ark.runtime.service.ArkService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,18 +31,33 @@ import java.util.List;
 @RequestMapping("/api/ai")
 public class AiChatController {
 
-    // 1. 定义日志对象
     private static final Logger log = LoggerFactory.getLogger(AiChatController.class);
 
-    // ⚠️ 记得检查这里是不是你的最新 Key 和 Endpoint ID
+    // 注入 Mapper 用于数据库操作
+    @Autowired
+    private SysAiHistoryMapper historyMapper;
+
+    // ⚠️ 你的配置
     private static final String API_KEY = "9b681730-e1d9-4105-a34b-3f201efb75a8";
     private static final String BASE_URL = "https://ark.cn-beijing.volces.com/api/v3";
-    private static final String MODEL_ID = "kimi-k2-thinking-251104"; 
+    private static final String MODEL_ID = "kimi-k2-thinking-251104";
 
-    @Anonymous
+    /**
+     * 获取当前用户的历史对话记录
+     */
+    @GetMapping("/history")
+    public AjaxResult getHistory() {
+        Long userId = SecurityUtils.getUserId();
+        // 查询数据库，按时间排序
+        List<SysAiHistory> list = historyMapper.selectAiHistoryList(userId);
+        return AjaxResult.success(list);
+    }
+
+    /**
+     * AI 对话接口 (已移除 @Anonymous，必须登录)
+     */
     @PostMapping("/chat")
     public AjaxResult chat(@RequestBody ChatRequest request) {
-        // --- 日志埋点 1：请求进入 ---
         log.info("========== [AI] 收到前端请求 ==========");
         log.info("用户提问内容: {}", request.getMessage());
         
@@ -51,7 +65,17 @@ public class AiChatController {
             return AjaxResult.error("请输入问题");
         }
 
-        // 开始计时
+        // 1. 获取当前登录用户ID
+        Long userId = SecurityUtils.getUserId();
+
+        // 2. 【核心】保存【用户】的消息到数据库
+        SysAiHistory userMsg = new SysAiHistory();
+        userMsg.setUserId(userId);
+        userMsg.setRole("user");
+        userMsg.setContent(request.getMessage());
+        userMsg.setCreateTime(new Date());
+        historyMapper.insertSysAiHistory(userMsg);
+
         long startTime = System.currentTimeMillis();
         ArkService arkService = null;
 
@@ -63,38 +87,67 @@ public class AiChatController {
                     .build();
 
             log.info("2. 正在构建请求参数，模型ID: {}", MODEL_ID);
+            // 定义你的提示词（人设）
+            String systemPrompt = "你是一个专业的AI智能教学助手，名字叫'智能教学小助手'。\n" +
+                                  "你的职责是解答学生的学习疑问，提供学习路线和建议。\n" +
+                                  "回答要求：\n" +
+                                  "1. 语气亲切、积极、富有鼓励性。\n" +
+                                  "2. 对复杂的概念要用通俗易懂的例子解释。\n" +
+                                  "3. 使用Markdown格式清晰排版。\n" +
+                                  "4. 严禁回答由于政治、色情等违法违规内容。";
+
             CreateResponsesRequest req = CreateResponsesRequest.builder()
                     .model(MODEL_ID)
-                    .input(ResponsesInput.builder().addListItem(
-                            ItemEasyMessage.builder()
-                                    .role(ResponsesConstants.MESSAGE_ROLE_USER)
-                                    .content(MessageContent.builder()
-                                            .addListItem(InputContentItemText.builder().text(request.getMessage()).build())
-                                            .build()
-                                    ).build()
-                    ).build())
-                    //.tools(Arrays.asList(ToolWebSearch.builder().build()))
+                    .input(ResponsesInput.builder()
+                            // 👇👇👇 【新增】第一步：添加系统人设 (System Message) 👇👇👇
+                            .addListItem(
+                                    ItemEasyMessage.builder()
+                                            .role(ResponsesConstants.MESSAGE_ROLE_SYSTEM) // 角色是 SYSTEM
+                                            .content(MessageContent.builder()
+                                                    .addListItem(InputContentItemText.builder().text(systemPrompt).build())
+                                                    .build()
+                                            ).build()
+                            )
+                            // 【新增结束】 
+
+                            // 第二步：添加用户的提问 (User Message)
+                            .addListItem(
+                                    ItemEasyMessage.builder()
+                                            .role(ResponsesConstants.MESSAGE_ROLE_USER) // 角色是 USER
+                                            .content(MessageContent.builder()
+                                                    .addListItem(InputContentItemText.builder().text(request.getMessage()).build())
+                                                    .build()
+                                            ).build()
+                            )
+                    .build())
+                    // .tools(...) // 保持注释
                     .build();
 
-            log.info("3. 开始调用火山引擎 API (此时可能会卡住等待)...");
-            
-            // --- 这里是最耗时的一步 ---
+            log.info("3. 开始调用火山引擎 API...");
             ResponseObject resp = arkService.createResponse(req);
             
             long duration = System.currentTimeMillis() - startTime;
             log.info("4. 火山引擎返回响应！耗时: {} ms", duration);
-            log.info("5. 原始响应对象: {}", resp); // 打印整个对象，看看是不是 null
 
             // 解析结果
             String cleanReply = extractContent(resp);
             log.info("6. 解析后的最终回复: {}", cleanReply);
+
+            // 3. 【核心】保存【AI】的消息到数据库
+            SysAiHistory aiMsg = new SysAiHistory();
+            aiMsg.setUserId(userId);
+            aiMsg.setRole("ai");
+            aiMsg.setContent(cleanReply);
+            aiMsg.setCreateTime(new Date());
+            historyMapper.insertSysAiHistory(aiMsg);
 
             return AjaxResult.success(new ChatResponse(cleanReply));
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
             log.error("!!! AI 服务调用异常 !!! 耗时: {} ms", duration, e);
-            return AjaxResult.error("AI 服务暂时不可用：" + e.getMessage());
+            // 即使报错，也返回成功状态码并带有错误提示，避免前端报“网络错误”
+            return AjaxResult.success(new ChatResponse("AI 思考超时或出错，请稍后再试。"));
         } finally {
             if (arkService != null) {
                 arkService.shutdownExecutor();
